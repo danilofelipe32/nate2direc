@@ -35,10 +35,41 @@ import { CommentModal } from '../components/CommentModal';
 
 // --- Components ---
 
-const DraggableTaskBar: React.FC<{ task: Task; onClick: (task: Task) => void }> = ({ task, onClick }) => {
+const ResizeHandle: React.FC<{ 
+  taskId: number; 
+  type: 'start' | 'end'; 
+  date: string;
+}> = ({ taskId, type, date }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: `task-${task.id}`,
-    data: { task },
+    id: `resize-${type}-${taskId}`,
+    data: { taskId, type, originalDate: date, isResize: true },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      className={`absolute top-0 bottom-0 w-3 cursor-col-resize z-20 hover:bg-white/40 transition-colors flex items-center justify-center ${
+        type === 'start' ? 'left-0 rounded-l-md' : 'right-0 rounded-r-md'
+      }`}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="w-0.5 h-4 bg-white/50 rounded-full" />
+    </div>
+  );
+};
+
+const DraggableTaskBar: React.FC<{ 
+  task: Task; 
+  date: Date; 
+  isStart?: boolean; 
+  isEnd?: boolean; 
+  onClick: (task: Task) => void 
+}> = ({ task, date, isStart, isEnd, onClick }) => {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: `task-${task.id}-${format(date, 'yyyy-MM-dd')}`,
+    data: { task, originalDate: format(date, 'yyyy-MM-dd') },
   });
 
   const getTaskColor = (task: Task) => {
@@ -68,14 +99,24 @@ const DraggableTaskBar: React.FC<{ task: Task; onClick: (task: Task) => void }> 
   return (
     <div
       ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      onClick={() => onClick(task)}
-      className={`h-8 rounded-md shadow-sm border ${getTaskColor(task)} cursor-pointer active:cursor-grabbing flex items-center justify-between px-2 relative group hover:brightness-110 transition-all`}
+      className={`h-8 ${isStart ? 'rounded-l-md border-l' : ''} ${isEnd ? 'rounded-r-md border-r' : ''} border-y ${getTaskColor(task)} cursor-pointer flex items-center justify-between relative group hover:brightness-110 transition-all z-10`}
       title={task.title}
+      onClick={() => onClick(task)}
     >
-      <span className="text-[10px] font-bold text-white truncate w-full">{task.title}</span>
-      <div className="absolute right-1 opacity-0 group-hover:opacity-100 text-white/80">
+      {isStart && <ResizeHandle taskId={task.id} type="start" date={format(date, 'yyyy-MM-dd')} />}
+      
+      <div 
+        {...listeners} 
+        {...attributes} 
+        className="flex-1 h-full flex items-center px-2 min-w-0 cursor-grab active:cursor-grabbing"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {isStart && <span className="text-[10px] font-bold text-white truncate w-full pointer-events-none">{task.title}</span>}
+      </div>
+
+      {isEnd && <ResizeHandle taskId={task.id} type="end" date={format(date, 'yyyy-MM-dd')} />}
+      
+      <div className="absolute right-1 opacity-0 group-hover:opacity-100 text-white/80 pointer-events-none">
         <GripVertical size={12} />
       </div>
     </div>
@@ -153,6 +194,9 @@ export const TimelineView: React.FC = () => {
   const handleDragStart = (event: DragStartEvent) => {
     if (event.active.data.current?.task) {
       setActiveTask(event.active.data.current.task);
+    } else if (event.active.data.current?.isResize) {
+      const task = tasks.find(t => t.id === event.active.data.current?.taskId);
+      if (task) setActiveTask(task);
     }
   };
 
@@ -160,21 +204,67 @@ export const TimelineView: React.FC = () => {
     const { active, over } = event;
     setActiveTask(null);
 
-    if (over && active.data.current?.task) {
+    if (over && active.data.current?.isResize) {
+      const { taskId, type } = active.data.current;
+      const newDateStr = over.data.current?.date;
+      const task = tasks.find(t => t.id === taskId);
+      
+      if (task && newDateStr) {
+        const updatedTask = { ...task };
+        if (type === 'start') {
+          updatedTask.startDate = newDateStr;
+          // Ensure startDate <= endDate
+          if (task.endDate && parseISO(newDateStr) > parseISO(task.endDate)) {
+            updatedTask.endDate = newDateStr;
+            updatedTask.due_date = newDateStr + 'T23:59:59Z';
+          }
+        } else {
+          updatedTask.endDate = newDateStr;
+          updatedTask.due_date = newDateStr + 'T23:59:59Z';
+          // Ensure endDate >= startDate
+          if (task.startDate && parseISO(newDateStr) < parseISO(task.startDate)) {
+            updatedTask.startDate = newDateStr;
+          }
+        }
+        updateTask(updatedTask);
+      }
+      return;
+    }
+
+    if (over && active.data.current?.task && active.data.current?.originalDate) {
       const task = active.data.current.task as Task;
+      const originalDateStr = active.data.current.originalDate;
       const newDateStr = over.data.current?.date;
       
-      // Only update if the date is different
-      if (newDateStr && newDateStr !== task.due_date.split('T')[0]) {
-        // Keep the original time, just update the date part
-        const originalDate = new Date(task.due_date);
+      if (newDateStr && originalDateStr && newDateStr !== originalDateStr) {
+        const originalDate = parseISO(originalDateStr);
         const newDate = parseISO(newDateStr);
-        newDate.setHours(originalDate.getHours(), originalDate.getMinutes(), originalDate.getSeconds());
         
-        updateTask({
-          ...task,
-          due_date: newDate.toISOString()
-        });
+        // Calculate the difference in time
+        const diffTime = newDate.getTime() - originalDate.getTime();
+        
+        const updatedTask = { ...task };
+        
+        // Update due_date
+        const originalDueDate = parseISO(task.due_date);
+        const newDueDate = new Date(originalDueDate.getTime() + diffTime);
+        updatedTask.due_date = newDueDate.toISOString();
+        
+        // Update startDate if it exists
+        if (task.startDate) {
+          const originalStartDate = parseISO(task.startDate);
+          const newStartDate = new Date(originalStartDate.getTime() + diffTime);
+          updatedTask.startDate = newStartDate.toISOString().split('T')[0];
+        }
+        
+        // Update endDate if it exists
+        if (task.endDate) {
+          const originalEndDate = parseISO(task.endDate);
+          const newEndDate = new Date(originalEndDate.getTime() + diffTime);
+          updatedTask.endDate = newEndDate.toISOString().split('T')[0];
+        }
+
+        updateTask(updatedTask);
       }
     }
   };
@@ -319,10 +409,28 @@ export const TimelineView: React.FC = () => {
                 {/* Timeline Columns */}
                 <div className="flex">
                   {days.map(day => {
-                    const isTaskDate = isSameDay(parseISO(task.due_date), day);
+                    const hasDates = task.startDate && task.endDate;
+                    const isTaskDate = hasDates 
+                      ? isWithinInterval(day, { 
+                          start: startOfDay(parseISO(task.startDate!)), 
+                          end: endOfDay(parseISO(task.endDate!)) 
+                        })
+                      : isSameDay(parseISO(task.due_date), day);
+                    
+                    const isStart = hasDates ? isSameDay(parseISO(task.startDate!), day) : true;
+                    const isEnd = hasDates ? isSameDay(parseISO(task.endDate!), day) : true;
+
                     return (
                       <DroppableCell key={day.toISOString()} date={day} taskId={task.id}>
-                        {isTaskDate && <DraggableTaskBar task={task} onClick={setEditingTask} />}
+                        {isTaskDate && (
+                          <DraggableTaskBar 
+                            task={task} 
+                            date={day}
+                            isStart={isStart}
+                            isEnd={isEnd}
+                            onClick={setEditingTask} 
+                          />
+                        )}
                       </DroppableCell>
                     );
                   })}
