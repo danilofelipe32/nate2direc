@@ -124,9 +124,18 @@ const TaskCard: React.FC<{ task: Task; onDelete: (id: number) => void; onClick: 
         </p>
       )}
       <div className="flex items-center justify-between mt-3">
-        <p className="text-xs text-slate-500 flex items-center gap-1">
-          <Calendar size={12} /> {new Date(task.due_date).toLocaleDateString('pt-BR')}
-        </p>
+        <div className="text-xs text-slate-500 flex flex-col gap-0.5">
+          {task.startDate && (
+            <p className="flex items-center gap-1">
+              <Calendar size={10} /> Início: {new Date(task.startDate).toLocaleDateString('pt-BR')}
+            </p>
+          )}
+          {task.endDate && (
+            <p className="flex items-center gap-1">
+              <Calendar size={10} /> Fim: {new Date(task.endDate).toLocaleDateString('pt-BR')}
+            </p>
+          )}
+        </div>
         <span className={`text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-wide border flex items-center gap-1 ${PRIORITY_COLORS[task.priority || 'medium']}`}>
           <Flag size={10} className="fill-current" />
           {PRIORITY_LABELS[task.priority || 'medium']}

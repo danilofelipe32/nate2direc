@@ -298,6 +298,11 @@ export const TimelineView: React.FC = () => {
                       onClick={() => setEditingTask(task)}
                     >
                       {task.title}
+                      <div className="text-[10px] text-slate-400">
+                        {task.startDate && <span>{new Date(task.startDate).toLocaleDateString('pt-BR')}</span>}
+                        {task.startDate && task.endDate && <span> - </span>}
+                        {task.endDate && <span>{new Date(task.endDate).toLocaleDateString('pt-BR')}</span>}
+                      </div>
                     </div>
                   </div>
                   <button 

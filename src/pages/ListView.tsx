@@ -101,7 +101,10 @@ const SortableTaskRow: React.FC<SortableTaskRowProps> = ({ task, updateTaskStatu
         </span>
       </td>
       <td className="p-4 text-sm text-slate-500 font-mono">
-        {new Date(task.due_date).toLocaleDateString('pt-BR')}
+        <div className="flex flex-col gap-0.5">
+          {task.startDate && <span>Início: {new Date(task.startDate).toLocaleDateString('pt-BR')}</span>}
+          {task.endDate && <span>Fim: {new Date(task.endDate).toLocaleDateString('pt-BR')}</span>}
+        </div>
       </td>
       <td className="p-4 text-right">
         <div className="flex justify-end gap-2">
