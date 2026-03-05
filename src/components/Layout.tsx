@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, List, Calendar, Kanban, CheckSquare } from 'lucide-react';
+import { LayoutDashboard, List, Calendar, Kanban, CheckSquare, Plus } from 'lucide-react';
 import { NotificationCenter } from './NotificationCenter';
+import { AddTaskModal } from './AddTaskModal';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
+  const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -62,7 +64,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto bg-slate-50 flex flex-col">
+      <main className="flex-1 overflow-auto bg-slate-50 flex flex-col relative">
         {/* Top Header with Notification Center */}
         <header className="bg-white border-b border-slate-200 px-8 py-4 flex justify-end items-center sticky top-0 z-20 shadow-sm">
           <NotificationCenter />
@@ -71,6 +73,19 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         <div className="p-8 max-w-7xl mx-auto flex-1 w-full">
           {children}
         </div>
+
+        {/* Floating Add Task Button */}
+        <button
+          onClick={() => setIsAddTaskModalOpen(true)}
+          className="fixed bottom-8 right-8 bg-indigo-600 text-white p-4 rounded-full shadow-xl shadow-indigo-500/30 hover:bg-indigo-700 hover:scale-105 transition-all duration-200 z-50"
+          title="Nova Tarefa"
+        >
+          <Plus size={28} />
+        </button>
+
+        {isAddTaskModalOpen && (
+          <AddTaskModal onClose={() => setIsAddTaskModalOpen(false)} />
+        )}
       </main>
     </div>
   );

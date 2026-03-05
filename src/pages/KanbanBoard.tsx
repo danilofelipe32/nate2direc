@@ -159,24 +159,15 @@ const Column: React.FC<{ id: string; title: string; tasks: Task[]; onDelete: (id
 };
 
 export const KanbanBoard: React.FC = () => {
-  const { tasks, addTask, deleteTask, updateTaskStatus, updateTask } = useTasks();
+  const { tasks, deleteTask, updateTaskStatus, updateTask } = useTasks();
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [newPriority, setNewPriority] = useState<'low' | 'medium' | 'high'>('medium');
   const [filterPriority, setFilterPriority] = useState<'all' | 'low' | 'medium' | 'high'>('all');
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
-
-  const handleAddTask = async () => {
-    if (!newTaskTitle.trim()) return;
-    await addTask(newTaskTitle, newPriority);
-    setNewTaskTitle('');
-    setNewPriority('medium');
-  };
 
   const onDragStart = (event: DragStartEvent) => {
     if (event.active.data.current?.type === 'Task') {
@@ -235,42 +226,23 @@ export const KanbanBoard: React.FC = () => {
           <p className="text-zinc-500">Gerencie suas tarefas visualmente</p>
         </div>
         <div className="flex gap-2 items-center flex-wrap">
-          <div className="flex items-center gap-2 mr-4">
-            <span className="text-sm text-zinc-500">Filtrar:</span>
-            <select
-              value={filterPriority}
-              onChange={(e) => setFilterPriority(e.target.value as any)}
-              className="p-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/20"
+          <span className="text-sm text-zinc-500 mr-2">Filtrar:</span>
+          {(['all', 'low', 'medium', 'high'] as const).map((priority) => (
+            <button
+              key={priority}
+              onClick={() => setFilterPriority(priority)}
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-200 border ${
+                filterPriority === priority
+                  ? priority === 'all' ? 'bg-zinc-900 text-white border-zinc-900' :
+                    priority === 'low' ? 'bg-emerald-500 text-white border-emerald-500' :
+                    priority === 'medium' ? 'bg-amber-500 text-white border-amber-500' :
+                    'bg-rose-500 text-white border-rose-500'
+                  : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-400'
+              }`}
             >
-              <option value="all">Todas</option>
-              <option value="low">Baixa</option>
-              <option value="medium">Média</option>
-              <option value="high">Alta</option>
-            </select>
-          </div>
-
-          <div className="flex gap-2">
-            <select
-              value={newPriority}
-              onChange={(e) => setNewPriority(e.target.value as any)}
-              className="p-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/20"
-            >
-              <option value="low">Baixa</option>
-              <option value="medium">Média</option>
-              <option value="high">Alta</option>
-            </select>
-            <input
-              type="text"
-              value={newTaskTitle}
-              onChange={(e) => setNewTaskTitle(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
-              placeholder="Nova tarefa..."
-              className="p-2 border border-zinc-300 rounded-xl w-64 focus:outline-none focus:ring-2 focus:ring-zinc-900/20"
-            />
-            <button onClick={handleAddTask} className="bg-zinc-900 text-white px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-zinc-800 transition-colors">
-              <Plus size={20} /> Nova tarefa
+              {priority === 'all' ? 'Todas' : PRIORITY_LABELS[priority]}
             </button>
-          </div>
+          ))}
         </div>
       </header>
 

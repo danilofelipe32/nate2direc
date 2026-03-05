@@ -200,42 +200,43 @@ export const DashboardView: React.FC = () => {
                   data={statusData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
+                  innerRadius={0}
+                  outerRadius={90}
+                  paddingAngle={2}
                   dataKey="value"
-                  stroke="none"
+                  stroke="white"
+                  strokeWidth={2}
                   cornerRadius={6}
+                  animationBegin={0}
+                  animationDuration={1500}
                 >
                   {statusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={entry.color} 
+                      style={{ filter: 'drop-shadow(0px 4px 6px rgba(0,0,0,0.1))' }}
+                    />
                   ))}
                 </Pie>
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)', 
-                    backdropFilter: 'blur(8px)',
-                    borderRadius: '12px', 
-                    border: 'none', 
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)' 
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)', 
+                    backdropFilter: 'blur(12px)',
+                    borderRadius: '16px', 
+                    border: '1px solid rgba(255,255,255,0.3)', 
+                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' 
                   }}
-                  itemStyle={{ color: '#1e293b', fontWeight: 600 }}
+                  itemStyle={{ color: '#1e293b', fontWeight: 600, fontSize: '14px' }}
                 />
                 <Legend 
                   verticalAlign="bottom" 
-                  height={36} 
+                  height={40} 
                   iconType="circle" 
-                  formatter={(value) => <span className="text-slate-600 font-medium ml-1">{value}</span>}
+                  formatter={(value) => <span className="text-slate-700 font-semibold ml-2 text-sm">{value}</span>}
                 />
               </PieChart>
             </ResponsiveContainer>
-            {/* Center Text */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none pb-8">
-              <div className="text-center">
-                <span className="text-3xl font-bold text-slate-800">{tasks.length}</span>
-                <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Tarefas</p>
-              </div>
-            </div>
+            {/* Center Text removed */}
           </div>
         </div>
       </div>

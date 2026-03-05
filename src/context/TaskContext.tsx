@@ -16,11 +16,13 @@ export interface Task {
   priority: 'low' | 'medium' | 'high';
   recurring?: 'none' | 'daily' | 'weekly' | 'monthly';
   comments?: Comment[];
+  startDate?: string;
+  endDate?: string;
 }
 
 interface TaskContextType {
   tasks: Task[];
-  addTask: (title: string, priority: 'low' | 'medium' | 'high', recurring?: 'none' | 'daily' | 'weekly' | 'monthly') => Promise<void>;
+  addTask: (title: string, priority: 'low' | 'medium' | 'high', startDate: string, endDate: string, recurring?: 'none' | 'daily' | 'weekly' | 'monthly') => Promise<void>;
   updateTask: (updatedTask: Task) => Promise<void>;
   deleteTask: (id: number) => Promise<void>;
   updateTaskStatus: (id: number, status: string) => Promise<void>;
@@ -54,17 +56,16 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshTasks = () => fetchTasks();
 
-  const addTask = async (title: string, priority: 'low' | 'medium' | 'high', recurring: 'none' | 'daily' | 'weekly' | 'monthly' = 'none') => {
+  const addTask = async (title: string, priority: 'low' | 'medium' | 'high', startDate: string, endDate: string, recurring: 'none' | 'daily' | 'weekly' | 'monthly' = 'none') => {
     try {
-      const date = new Date().toISOString();
       const res = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description: '', due_date: date, priority, recurring, comments: [] })
+        body: JSON.stringify({ title, description: '', due_date: endDate, startDate, endDate, priority, recurring, comments: [] })
       });
       if (!res.ok) throw new Error('Failed to add task');
       const newTask = await res.json();
-      setTasks([...tasks, { id: newTask.id, title, description: '', due_date: date, status: 'todo', priority, recurring, comments: [] }]);
+      setTasks([...tasks, { id: newTask.id, title, description: '', due_date: endDate, status: 'todo', priority, recurring, comments: [], startDate, endDate }]);
     } catch (error) {
       console.error("Error adding task:", error);
       alert("Falha ao adicionar tarefa.");
