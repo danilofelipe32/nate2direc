@@ -86,7 +86,7 @@ export const DashboardView: React.FC = () => {
   // --- Components ---
 
   const StatCard = ({ title, value, icon: Icon, color, subtext }: any) => (
-    <div className="relative overflow-hidden bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/50 dark:border-slate-800/50 p-6 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 group">
+    <div className="relative overflow-hidden bg-white/40 dark:bg-slate-900/60 backdrop-blur-xl border border-white/50 dark:border-slate-800/50 p-6 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 group">
       <div className={`absolute -right-6 -top-6 w-24 h-24 rounded-full opacity-10 group-hover:scale-110 transition-transform duration-500 ${color.bg}`} />
       <div className="flex items-start justify-between relative z-10">
         <div>

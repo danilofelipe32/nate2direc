@@ -107,22 +107,22 @@ export const NotificationCenter: React.FC = () => {
     <div className="relative" ref={notificationRef}>
       <button 
         onClick={toggleOpen}
-        className="relative p-2 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition-colors"
+        className="relative p-2 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
       >
         <Bell size={20} />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white"></span>
+          <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white dark:border-slate-900"></span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right">
-          <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-            <h3 className="font-semibold text-slate-900">Notificações</h3>
+        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+          <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100">Notificações</h3>
             {unreadCount > 0 && (
               <button 
                 onClick={markAllAsRead}
-                className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+                className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium"
               >
                 Marcar todas como lidas
               </button>
@@ -131,16 +131,16 @@ export const NotificationCenter: React.FC = () => {
           
           <div className="max-h-[400px] overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="p-8 text-center text-slate-500">
+              <div className="p-8 text-center text-slate-500 dark:text-slate-400">
                 <Bell size={24} className="mx-auto mb-2 opacity-20" />
                 <p className="text-sm">Nenhuma notificação</p>
               </div>
             ) : (
-              <div className="divide-y divide-slate-50">
+              <div className="divide-y divide-slate-50 dark:divide-slate-800">
                 {notifications.map(notification => (
                   <div 
                     key={notification.id} 
-                    className={`p-4 hover:bg-slate-50 transition-colors cursor-pointer ${notification.read ? 'opacity-60' : 'bg-white'}`}
+                    className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer ${notification.read ? 'opacity-60' : 'bg-white dark:bg-slate-900'}`}
                     onClick={() => markAsRead(notification.id)}
                   >
                     <div className="flex gap-3 items-start">
@@ -148,13 +148,13 @@ export const NotificationCenter: React.FC = () => {
                         {getIcon(notification.type)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-medium text-slate-900 ${!notification.read ? 'font-semibold' : ''}`}>
+                        <p className={`text-sm font-medium text-slate-900 dark:text-slate-100 ${!notification.read ? 'font-semibold' : ''}`}>
                           {notification.title}
                         </p>
-                        <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">
                           {notification.message}
                         </p>
-                        <p className="text-[10px] text-slate-400 mt-1.5">
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5">
                           {notification.timestamp.toLocaleDateString()}
                         </p>
                       </div>

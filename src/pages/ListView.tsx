@@ -23,9 +23,9 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 const PRIORITY_COLORS = {
-  low: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  medium: 'bg-amber-50 text-amber-700 border-amber-200',
-  high: 'bg-rose-50 text-rose-700 border-rose-200',
+  low: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800',
+  medium: 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800',
+  high: 'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-800',
 };
 
 const PRIORITY_LABELS = {
@@ -41,9 +41,9 @@ const STATUS_LABELS = {
 };
 
 const STATUS_COLORS = {
-  todo: 'bg-slate-100 text-slate-700',
-  'in-progress': 'bg-blue-50 text-blue-700',
-  done: 'bg-emerald-50 text-emerald-700',
+  todo: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300',
+  'in-progress': 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400',
+  done: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400',
 };
 
 interface SortableTaskRowProps {
@@ -266,11 +266,11 @@ export const ListView: React.FC = () => {
         
         {filteredTasks.length === 0 && (
           <div className="p-12 text-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 mb-4">
-              <CheckCircle className="text-slate-400" size={24} />
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
+              <CheckCircle className="text-slate-400 dark:text-slate-600" size={24} />
             </div>
-            <h3 className="text-slate-900 font-medium mb-1">Nenhuma tarefa encontrada</h3>
-            <p className="text-slate-500 text-sm">Tente ajustar sua busca ou adicione uma nova tarefa.</p>
+            <h3 className="text-slate-900 dark:text-slate-100 font-medium mb-1">Nenhuma tarefa encontrada</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Tente ajustar sua busca ou adicione uma nova tarefa.</p>
           </div>
         )}
       </div>

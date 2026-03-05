@@ -409,7 +409,7 @@ export const TimelineView: React.FC = () => {
                 {/* Timeline Columns */}
                 <div className="flex">
                   {days.map(day => {
-                    const hasDates = task.startDate && task.endDate;
+                    const hasDates = !!(task.startDate && task.endDate);
                     const isTaskDate = hasDates 
                       ? isWithinInterval(day, { 
                           start: startOfDay(parseISO(task.startDate!)), 
