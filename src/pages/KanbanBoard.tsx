@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Calendar, GripVertical, Bell, Flag } from 'lucide-react';
+import { Plus, Trash2, Calendar, GripVertical, Bell, Flag, Repeat } from 'lucide-react';
 import {
   DndContext,
   closestCorners,
@@ -113,7 +113,14 @@ const TaskCard: React.FC<{ task: Task; onDelete: (id: number) => void; onClick: 
           <Trash2 size={16} />
         </button>
       </div>
-      <h3 className="font-semibold text-slate-800 mb-2 text-sm leading-tight">{task.title}</h3>
+      <div className="flex items-center gap-2 mb-2">
+        <h3 className="font-semibold text-slate-800 text-sm leading-tight truncate flex-1">{task.title}</h3>
+        {task.recurring && task.recurring !== 'none' && (
+          <div className="text-indigo-500" title={`Recorrência: ${task.recurring}`}>
+            <Repeat size={14} />
+          </div>
+        )}
+      </div>
       <div className="flex items-center justify-between mt-3">
         <p className="text-xs text-slate-500 flex items-center gap-1">
           <Calendar size={12} /> {new Date(task.due_date).toLocaleDateString('pt-BR')}

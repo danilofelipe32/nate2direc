@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Calendar, Flag, CheckCircle, Type, AlignLeft } from 'lucide-react';
+import { X, Calendar, Flag, CheckCircle, Type, AlignLeft, Repeat } from 'lucide-react';
 import { Task } from '../context/TaskContext';
 
 interface EditTaskModalProps {
@@ -14,6 +14,7 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, onClose, onS
   const [dueDate, setDueDate] = useState(task.due_date ? new Date(task.due_date).toISOString().split('T')[0] : '');
   const [priority, setPriority] = useState(task.priority);
   const [status, setStatus] = useState(task.status);
+  const [recurring, setRecurring] = useState(task.recurring || 'none');
 
   const handleSave = () => {
     onSave({
@@ -22,15 +23,16 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, onClose, onS
       description,
       due_date: new Date(dueDate).toISOString(),
       priority,
-      status
+      status,
+      recurring
     });
     onClose();
   };
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all duration-300">
-      <div className="bg-white rounded-2xl p-0 w-full max-w-lg shadow-2xl border border-slate-200 overflow-hidden transform transition-all scale-100">
-        <div className="flex justify-between items-center p-6 border-b border-slate-100 bg-slate-50/50">
+      <div className="bg-white rounded-2xl p-0 w-full max-w-lg shadow-2xl border border-slate-200 overflow-hidden transform transition-all scale-100 max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center p-6 border-b border-slate-100 bg-slate-50/50 sticky top-0 z-10">
           <div>
             <h2 className="text-xl font-bold text-slate-800">Editar Tarefa</h2>
             <p className="text-sm text-slate-500">Atualize os detalhes da sua tarefa</p>
@@ -103,28 +105,51 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, onClose, onS
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <CheckCircle size={14} /> Status
-            </label>
-            <div className="relative">
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value as any)}
-                className="w-full p-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all appearance-none bg-white text-slate-600"
-              >
-                <option value="todo">A Fazer</option>
-                <option value="in-progress">Em Progresso</option>
-                <option value="done">Concluído</option>
-              </select>
-              <div className="absolute right-3 top-3.5 pointer-events-none text-slate-400">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+          <div className="grid grid-cols-2 gap-5">
+             <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <CheckCircle size={14} /> Status
+              </label>
+              <div className="relative">
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as any)}
+                  className="w-full p-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all appearance-none bg-white text-slate-600"
+                >
+                  <option value="todo">A Fazer</option>
+                  <option value="in-progress">Em Progresso</option>
+                  <option value="done">Concluído</option>
+                </select>
+                <div className="absolute right-3 top-3.5 pointer-events-none text-slate-400">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <Repeat size={14} /> Recorrência
+              </label>
+              <div className="relative">
+                <select
+                  value={recurring}
+                  onChange={(e) => setRecurring(e.target.value as any)}
+                  className="w-full p-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all appearance-none bg-white text-slate-600"
+                >
+                  <option value="none">Nenhuma</option>
+                  <option value="daily">Diária</option>
+                  <option value="weekly">Semanal</option>
+                  <option value="monthly">Mensal</option>
+                </select>
+                <div className="absolute right-3 top-3.5 pointer-events-none text-slate-400">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 p-6 bg-slate-50 border-t border-slate-100">
+        <div className="flex justify-end gap-3 p-6 bg-slate-50 border-t border-slate-100 sticky bottom-0 z-10">
           <button 
             onClick={onClose} 
             className="px-5 py-2.5 text-slate-600 hover:bg-white hover:text-slate-800 hover:shadow-sm border border-transparent hover:border-slate-200 rounded-xl transition-all duration-200 font-medium"

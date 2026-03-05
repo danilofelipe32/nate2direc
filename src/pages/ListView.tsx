@@ -1,11 +1,28 @@
 import React, { useState } from 'react';
-import { useTasks } from '../context/TaskContext';
-import { Edit2, Trash2, CheckCircle, Circle, AlertCircle } from 'lucide-react';
+import { useTasks, Task } from '../context/TaskContext';
+import { Edit2, Trash2, CheckCircle, Circle, AlertCircle, GripVertical } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const PRIORITY_COLORS = {
-  low: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-  medium: 'bg-amber-50 text-amber-700 border border-amber-200',
-  high: 'bg-rose-50 text-rose-700 border border-rose-200',
+  low: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  medium: 'bg-amber-50 text-amber-700 border-amber-200',
+  high: 'bg-rose-50 text-rose-700 border-rose-200',
 };
 
 const PRIORITY_LABELS = {
@@ -26,14 +43,106 @@ const STATUS_COLORS = {
   done: 'bg-emerald-50 text-emerald-700',
 };
 
+interface SortableTaskRowProps {
+  task: Task;
+  updateTaskStatus: (id: number, status: string) => Promise<void>;
+  deleteTask: (id: number) => Promise<void>;
+}
+
+const SortableTaskRow: React.FC<SortableTaskRowProps> = ({ task, updateTaskStatus, deleteTask }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: task.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 10 : 'auto',
+    position: isDragging ? 'relative' : 'static' as any,
+    opacity: isDragging ? 0.8 : 1,
+  };
+
+  return (
+    <tr
+      ref={setNodeRef}
+      style={style}
+      className={`hover:bg-slate-50/80 transition-colors group ${isDragging ? 'bg-indigo-50 shadow-lg' : ''}`}
+    >
+      <td className="p-4 w-10">
+        <div {...attributes} {...listeners} className="cursor-grab text-slate-400 hover:text-indigo-600">
+          <GripVertical size={16} />
+        </div>
+      </td>
+      <td className="p-4 w-10">
+        <button 
+          onClick={() => updateTaskStatus(task.id, task.status === 'done' ? 'todo' : 'done')}
+          className={`transition-colors ${task.status === 'done' ? 'text-emerald-500' : 'text-slate-300 hover:text-indigo-500'}`}
+        >
+          {task.status === 'done' ? <CheckCircle size={22} className="fill-emerald-50" /> : <Circle size={22} />}
+        </button>
+      </td>
+      <td className="p-4">
+        <div className={`font-medium text-slate-900 ${task.status === 'done' ? 'line-through text-slate-400' : ''}`}>{task.title}</div>
+        {task.description && <div className="text-xs text-slate-500 truncate max-w-md mt-0.5">{task.description}</div>}
+      </td>
+      <td className="p-4">
+        <span className={`text-[10px] px-2.5 py-1 rounded-full font-semibold uppercase tracking-wide border ${PRIORITY_COLORS[task.priority]}`}>
+          {PRIORITY_LABELS[task.priority]}
+        </span>
+      </td>
+      <td className="p-4 text-sm text-slate-500 font-mono">
+        {new Date(task.due_date).toLocaleDateString('pt-BR')}
+      </td>
+      <td className="p-4 text-right">
+        <div className="flex justify-end gap-2">
+          <button 
+            onClick={() => deleteTask(task.id)}
+            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+            title="Excluir"
+          >
+            <Trash2 size={18} />
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+};
+
 export const ListView: React.FC = () => {
   const { tasks, deleteTask, updateTaskStatus, updateTask } = useTasks();
   const [filter, setFilter] = useState('');
+  const [orderedTasks, setOrderedTasks] = useState<Task[]>([]);
 
-  const filteredTasks = tasks.filter(task => 
+  React.useEffect(() => {
+    setOrderedTasks(tasks);
+  }, [tasks]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const filteredTasks = orderedTasks.filter(task => 
     task.title.toLowerCase().includes(filter.toLowerCase()) ||
     task.description.toLowerCase().includes(filter.toLowerCase())
   );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      setOrderedTasks((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over?.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -52,52 +161,39 @@ export const ListView: React.FC = () => {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-slate-50 border-b border-slate-200">
-            <tr>
-              <th className="p-4 font-semibold text-slate-600 text-xs uppercase tracking-wider">Status</th>
-              <th className="p-4 font-semibold text-slate-600 text-xs uppercase tracking-wider w-1/2">Tarefa</th>
-              <th className="p-4 font-semibold text-slate-600 text-xs uppercase tracking-wider">Prioridade</th>
-              <th className="p-4 font-semibold text-slate-600 text-xs uppercase tracking-wider">Vencimento</th>
-              <th className="p-4 font-semibold text-slate-600 text-xs uppercase tracking-wider text-right">Ações</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {filteredTasks.map((task) => (
-              <tr key={task.id} className="hover:bg-slate-50/80 transition-colors group">
-                <td className="p-4 w-10">
-                  <button 
-                    onClick={() => updateTaskStatus(task.id, task.status === 'done' ? 'todo' : 'done')}
-                    className={`transition-colors ${task.status === 'done' ? 'text-emerald-500' : 'text-slate-300 hover:text-indigo-500'}`}
-                  >
-                    {task.status === 'done' ? <CheckCircle size={22} className="fill-emerald-50" /> : <Circle size={22} />}
-                  </button>
-                </td>
-                <td className="p-4">
-                  <div className={`font-medium text-slate-900 ${task.status === 'done' ? 'line-through text-slate-400' : ''}`}>{task.title}</div>
-                  {task.description && <div className="text-xs text-slate-500 truncate max-w-md mt-0.5">{task.description}</div>}
-                </td>
-                <td className="p-4">
-                  <span className={`text-[10px] px-2.5 py-1 rounded-full font-semibold uppercase tracking-wide ${PRIORITY_COLORS[task.priority]}`}>
-                    {PRIORITY_LABELS[task.priority]}
-                  </span>
-                </td>
-                <td className="p-4 text-sm text-slate-500 font-mono">
-                  {new Date(task.due_date).toLocaleDateString('pt-BR')}
-                </td>
-                <td className="p-4 text-right flex justify-end gap-2">
-                  <button 
-                    onClick={() => deleteTask(task.id)}
-                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                    title="Excluir"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </td>
+        <DndContext 
+          sensors={sensors} 
+          collisionDetection={closestCenter} 
+          onDragEnd={handleDragEnd}
+        >
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-slate-50 border-b border-slate-200">
+              <tr>
+                <th className="p-4 w-10"></th>
+                <th className="p-4 font-semibold text-slate-600 text-xs uppercase tracking-wider w-10">Status</th>
+                <th className="p-4 font-semibold text-slate-600 text-xs uppercase tracking-wider w-1/2">Tarefa</th>
+                <th className="p-4 font-semibold text-slate-600 text-xs uppercase tracking-wider">Prioridade</th>
+                <th className="p-4 font-semibold text-slate-600 text-xs uppercase tracking-wider">Vencimento</th>
+                <th className="p-4 font-semibold text-slate-600 text-xs uppercase tracking-wider text-right">Ações</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              <SortableContext 
+                items={filteredTasks.map(t => t.id)} 
+                strategy={verticalListSortingStrategy}
+              >
+                {filteredTasks.map((task) => (
+                  <SortableTaskRow 
+                    key={task.id} 
+                    task={task} 
+                    updateTaskStatus={updateTaskStatus} 
+                    deleteTask={deleteTask} 
+                  />
+                ))}
+              </SortableContext>
+            </tbody>
+          </table>
+        </DndContext>
         
         {filteredTasks.length === 0 && (
           <div className="p-12 text-center">

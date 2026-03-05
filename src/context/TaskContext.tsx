@@ -7,11 +7,12 @@ export interface Task {
   due_date: string;
   status: 'todo' | 'in-progress' | 'done';
   priority: 'low' | 'medium' | 'high';
+  recurring?: 'none' | 'daily' | 'weekly' | 'monthly';
 }
 
 interface TaskContextType {
   tasks: Task[];
-  addTask: (title: string, priority: 'low' | 'medium' | 'high') => Promise<void>;
+  addTask: (title: string, priority: 'low' | 'medium' | 'high', recurring?: 'none' | 'daily' | 'weekly' | 'monthly') => Promise<void>;
   updateTask: (updatedTask: Task) => Promise<void>;
   deleteTask: (id: number) => Promise<void>;
   updateTaskStatus: (id: number, status: string) => Promise<void>;
@@ -30,7 +31,8 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const validTasks = data.map((t: any) => ({
           ...t,
           status: ['todo', 'in-progress', 'done'].includes(t.status) ? t.status : 'todo',
-          priority: ['low', 'medium', 'high'].includes(t.priority) ? t.priority : 'medium'
+          priority: ['low', 'medium', 'high'].includes(t.priority) ? t.priority : 'medium',
+          recurring: ['none', 'daily', 'weekly', 'monthly'].includes(t.recurring) ? t.recurring : 'none'
         }));
         setTasks(validTasks);
       });
@@ -42,17 +44,17 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshTasks = () => fetchTasks();
 
-  const addTask = async (title: string, priority: 'low' | 'medium' | 'high') => {
+  const addTask = async (title: string, priority: 'low' | 'medium' | 'high', recurring: 'none' | 'daily' | 'weekly' | 'monthly' = 'none') => {
     try {
       const date = new Date().toISOString();
       const res = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description: '', due_date: date, priority })
+        body: JSON.stringify({ title, description: '', due_date: date, priority, recurring })
       });
       if (!res.ok) throw new Error('Failed to add task');
       const newTask = await res.json();
-      setTasks([...tasks, { id: newTask.id, title, description: '', due_date: date, status: 'todo', priority }]);
+      setTasks([...tasks, { id: newTask.id, title, description: '', due_date: date, status: 'todo', priority, recurring }]);
     } catch (error) {
       console.error("Error adding task:", error);
       alert("Falha ao adicionar tarefa.");
@@ -69,7 +71,8 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
           description: updatedTask.description,
           due_date: updatedTask.due_date,
           status: updatedTask.status,
-          priority: updatedTask.priority
+          priority: updatedTask.priority,
+          recurring: updatedTask.recurring
         })
       });
       setTasks(tasks.map(t => t.id === updatedTask.id ? updatedTask : t));

@@ -9,7 +9,8 @@ import {
   isSameDay, 
   isToday, 
   parseISO, 
-  subDays 
+  subDays,
+  isPast
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
@@ -35,10 +36,24 @@ const DraggableTaskBar: React.FC<{ task: Task }> = ({ task }) => {
     data: { task },
   });
 
-  const priorityColors = {
-    low: 'bg-emerald-500 border-emerald-600',
-    medium: 'bg-amber-500 border-amber-600',
-    high: 'bg-rose-500 border-rose-600',
+  const getTaskColor = (task: Task) => {
+    const dueDate = parseISO(task.due_date);
+    const today = new Date();
+    const threeDaysFromNow = addDays(today, 3);
+
+    if (isPast(dueDate) || isToday(dueDate)) {
+      return 'bg-rose-500 border-rose-600 shadow-rose-200';
+    }
+    if (dueDate <= threeDaysFromNow) {
+      return 'bg-orange-500 border-orange-600 shadow-orange-200';
+    }
+    
+    const priorityColors = {
+      low: 'bg-emerald-500 border-emerald-600',
+      medium: 'bg-amber-500 border-amber-600',
+      high: 'bg-rose-500 border-rose-600',
+    };
+    return priorityColors[task.priority];
   };
 
   if (isDragging) {
@@ -50,7 +65,7 @@ const DraggableTaskBar: React.FC<{ task: Task }> = ({ task }) => {
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className={`h-8 rounded-md shadow-sm border ${priorityColors[task.priority]} cursor-grab active:cursor-grabbing flex items-center justify-between px-2 relative group hover:brightness-110 transition-all`}
+      className={`h-8 rounded-md shadow-sm border ${getTaskColor(task)} cursor-grab active:cursor-grabbing flex items-center justify-between px-2 relative group hover:brightness-110 transition-all`}
       title={task.title}
     >
       <span className="text-[10px] font-bold text-white truncate w-full">{task.title}</span>
