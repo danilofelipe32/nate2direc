@@ -30,7 +30,8 @@ import {
   TouchSensor,
   MouseSensor,
 } from '@dnd-kit/core';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, GripVertical, Filter, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, GripVertical, Filter, X, MessageSquare } from 'lucide-react';
+import { CommentModal } from '../components/CommentModal';
 
 // --- Components ---
 
@@ -107,6 +108,7 @@ export const TimelineView: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [commentingTask, setCommentingTask] = useState<Task | null>(null);
   
   // Date Range Filter State
   const [customStartDate, setCustomStartDate] = useState<string>('');
@@ -116,7 +118,7 @@ export const TimelineView: React.FC = () => {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 3,
       },
     }),
     useSensor(MouseSensor),
@@ -292,19 +294,31 @@ export const TimelineView: React.FC = () => {
             {filteredTasks.map(task => (
               <div key={task.id} className="flex hover:bg-slate-50/50 transition-colors">
                 {/* Task Name Column */}
-                <div className="w-64 flex-shrink-0 p-3 border-r border-slate-200 border-b border-slate-100 flex items-center gap-2 bg-white sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
-                  <div className={`w-2 h-2 rounded-full ${
-                    task.priority === 'high' ? 'bg-rose-500' : 
-                    task.priority === 'medium' ? 'bg-amber-500' : 
-                    'bg-emerald-500'
-                  }`} />
-                  <div 
-                    className="truncate text-sm font-medium text-slate-700 cursor-pointer hover:text-indigo-600 transition-colors" 
-                    title={task.title}
-                    onClick={() => setEditingTask(task)}
-                  >
-                    {task.title}
+                <div className="w-64 flex-shrink-0 p-3 border-r border-slate-200 border-b border-slate-100 flex items-center justify-between bg-white sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                  <div className="flex items-center gap-2 truncate">
+                    <div className={`w-2 h-2 rounded-full ${
+                      task.priority === 'high' ? 'bg-rose-500' : 
+                      task.priority === 'medium' ? 'bg-amber-500' : 
+                      'bg-emerald-500'
+                    }`} />
+                    <div 
+                      className="truncate text-sm font-medium text-slate-700 cursor-pointer hover:text-indigo-600 transition-colors" 
+                      title={task.title}
+                      onClick={() => setEditingTask(task)}
+                    >
+                      {task.title}
+                    </div>
                   </div>
+                  <button 
+                    onClick={() => setCommentingTask(task)}
+                    className="text-slate-400 hover:text-indigo-600 transition-colors flex items-center gap-1"
+                    title="Comentários"
+                  >
+                    <MessageSquare size={14} />
+                    {task.comments && task.comments.length > 0 && (
+                      <span className="text-[10px] font-bold">{task.comments.length}</span>
+                    )}
+                  </button>
                 </div>
 
                 {/* Timeline Columns */}
@@ -343,6 +357,12 @@ export const TimelineView: React.FC = () => {
           task={editingTask}
           onClose={() => setEditingTask(null)}
           onSave={updateTask}
+        />
+      )}
+      {commentingTask && (
+        <CommentModal
+          task={commentingTask}
+          onClose={() => setCommentingTask(null)}
         />
       )}
     </div>

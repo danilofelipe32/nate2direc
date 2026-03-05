@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTasks, Task } from '../context/TaskContext';
-import { Edit2, Trash2, CheckCircle, Circle, AlertCircle, GripVertical } from 'lucide-react';
+import { Edit2, Trash2, CheckCircle, Circle, AlertCircle, GripVertical, MessageSquare } from 'lucide-react';
+import { CommentModal } from '../components/CommentModal';
 import {
   DndContext,
   closestCenter,
@@ -47,9 +48,10 @@ interface SortableTaskRowProps {
   task: Task;
   updateTaskStatus: (id: number, status: string) => Promise<void>;
   deleteTask: (id: number) => Promise<void>;
+  onCommentClick: (task: Task) => void;
 }
 
-const SortableTaskRow: React.FC<SortableTaskRowProps> = ({ task, updateTaskStatus, deleteTask }) => {
+const SortableTaskRow: React.FC<SortableTaskRowProps> = ({ task, updateTaskStatus, deleteTask, onCommentClick }) => {
   const {
     attributes,
     listeners,
@@ -101,6 +103,16 @@ const SortableTaskRow: React.FC<SortableTaskRowProps> = ({ task, updateTaskStatu
       <td className="p-4 text-right">
         <div className="flex justify-end gap-2">
           <button 
+            onClick={() => onCommentClick(task)}
+            className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all opacity-0 group-hover:opacity-100 flex items-center gap-1"
+            title="Comentários"
+          >
+            <MessageSquare size={18} />
+            {task.comments && task.comments.length > 0 && (
+              <span className="text-xs font-bold">{task.comments.length}</span>
+            )}
+          </button>
+          <button 
             onClick={() => deleteTask(task.id)}
             className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
             title="Excluir"
@@ -117,13 +129,14 @@ export const ListView: React.FC = () => {
   const { tasks, deleteTask, updateTaskStatus, updateTask } = useTasks();
   const [filter, setFilter] = useState('');
   const [orderedTasks, setOrderedTasks] = useState<Task[]>([]);
+  const [commentingTask, setCommentingTask] = useState<Task | null>(null);
 
   React.useEffect(() => {
     setOrderedTasks(tasks);
   }, [tasks]);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 3 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
@@ -188,12 +201,20 @@ export const ListView: React.FC = () => {
                     task={task} 
                     updateTaskStatus={updateTaskStatus} 
                     deleteTask={deleteTask} 
+                    onCommentClick={setCommentingTask}
                   />
                 ))}
               </SortableContext>
             </tbody>
           </table>
         </DndContext>
+        
+        {commentingTask && (
+          <CommentModal
+            task={commentingTask}
+            onClose={() => setCommentingTask(null)}
+          />
+        )}
         
         {filteredTasks.length === 0 && (
           <div className="p-12 text-center">
