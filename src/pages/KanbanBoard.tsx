@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Calendar, GripVertical, Bell } from 'lucide-react';
+import { Plus, Trash2, Calendar, GripVertical, Bell, Flag } from 'lucide-react';
 import {
   DndContext,
   closestCorners,
@@ -87,17 +87,24 @@ const TaskCard: React.FC<{ task: Task; onDelete: (id: number) => void; onClick: 
       ref={setNodeRef}
       style={style}
       onClick={() => onClick(task)}
-      className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 group hover:border-indigo-300 hover:shadow-md transition-all duration-200 cursor-pointer relative overflow-hidden"
+      className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 group hover:border-indigo-300 hover:shadow-md transition-all duration-200 cursor-pointer relative overflow-hidden pl-5"
     >
-      <div className={`absolute left-0 top-0 bottom-0 w-1 ${
+      <div className={`absolute left-0 top-0 bottom-0 w-2 ${
         task.priority === 'high' ? 'bg-rose-500' : 
         task.priority === 'medium' ? 'bg-amber-500' : 
         'bg-emerald-500'
       }`} />
       
-      <div className="flex justify-between items-start mb-2 pl-2">
-        <div {...attributes} {...listeners} className="cursor-grab text-slate-400 hover:text-indigo-600" onClick={(e) => e.stopPropagation()}>
-          <GripVertical size={16} />
+      <div className="flex justify-between items-start mb-2">
+        <div className="flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full ${
+              task.priority === 'high' ? 'bg-rose-500 animate-pulse' : 
+              task.priority === 'medium' ? 'bg-amber-500' : 
+              'bg-emerald-500'
+          }`} />
+          <div {...attributes} {...listeners} className="cursor-grab text-slate-400 hover:text-indigo-600" onClick={(e) => e.stopPropagation()}>
+            <GripVertical size={16} />
+          </div>
         </div>
         <button 
           onClick={(e) => { e.stopPropagation(); onDelete(task.id); }} 
@@ -106,12 +113,13 @@ const TaskCard: React.FC<{ task: Task; onDelete: (id: number) => void; onClick: 
           <Trash2 size={16} />
         </button>
       </div>
-      <h3 className="font-semibold text-slate-800 mb-1 pl-2 text-sm leading-tight">{task.title}</h3>
-      <div className="flex items-center justify-between mt-3 pl-2">
+      <h3 className="font-semibold text-slate-800 mb-2 text-sm leading-tight">{task.title}</h3>
+      <div className="flex items-center justify-between mt-3">
         <p className="text-xs text-slate-500 flex items-center gap-1">
           <Calendar size={12} /> {new Date(task.due_date).toLocaleDateString('pt-BR')}
         </p>
-        <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border ${PRIORITY_COLORS[task.priority || 'medium']}`}>
+        <span className={`text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-wide border flex items-center gap-1 ${PRIORITY_COLORS[task.priority || 'medium']}`}>
+          <Flag size={10} className="fill-current" />
           {PRIORITY_LABELS[task.priority || 'medium']}
         </span>
       </div>
