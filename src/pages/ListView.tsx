@@ -1,0 +1,114 @@
+import React, { useState } from 'react';
+import { useTasks } from '../context/TaskContext';
+import { Edit2, Trash2, CheckCircle, Circle, AlertCircle } from 'lucide-react';
+
+const PRIORITY_COLORS = {
+  low: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+  medium: 'bg-amber-50 text-amber-700 border border-amber-200',
+  high: 'bg-rose-50 text-rose-700 border border-rose-200',
+};
+
+const PRIORITY_LABELS = {
+  low: 'Baixa',
+  medium: 'Média',
+  high: 'Alta',
+};
+
+const STATUS_LABELS = {
+  todo: 'A Fazer',
+  'in-progress': 'Em Progresso',
+  done: 'Concluído',
+};
+
+const STATUS_COLORS = {
+  todo: 'bg-slate-100 text-slate-700',
+  'in-progress': 'bg-blue-50 text-blue-700',
+  done: 'bg-emerald-50 text-emerald-700',
+};
+
+export const ListView: React.FC = () => {
+  const { tasks, deleteTask, updateTaskStatus, updateTask } = useTasks();
+  const [filter, setFilter] = useState('');
+
+  const filteredTasks = tasks.filter(task => 
+    task.title.toLowerCase().includes(filter.toLowerCase()) ||
+    task.description.toLowerCase().includes(filter.toLowerCase())
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Lista de Tarefas</h1>
+          <p className="text-slate-500 text-sm">Gerencie suas tarefas em formato de lista</p>
+        </div>
+        <input
+          type="text"
+          placeholder="Buscar tarefas..."
+          className="p-2.5 border border-slate-200 rounded-lg w-72 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+        />
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <table className="w-full text-left">
+          <thead className="bg-slate-50 border-b border-slate-200">
+            <tr>
+              <th className="p-4 font-semibold text-slate-600 text-xs uppercase tracking-wider">Status</th>
+              <th className="p-4 font-semibold text-slate-600 text-xs uppercase tracking-wider w-1/2">Tarefa</th>
+              <th className="p-4 font-semibold text-slate-600 text-xs uppercase tracking-wider">Prioridade</th>
+              <th className="p-4 font-semibold text-slate-600 text-xs uppercase tracking-wider">Vencimento</th>
+              <th className="p-4 font-semibold text-slate-600 text-xs uppercase tracking-wider text-right">Ações</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {filteredTasks.map((task) => (
+              <tr key={task.id} className="hover:bg-slate-50/80 transition-colors group">
+                <td className="p-4 w-10">
+                  <button 
+                    onClick={() => updateTaskStatus(task.id, task.status === 'done' ? 'todo' : 'done')}
+                    className={`transition-colors ${task.status === 'done' ? 'text-emerald-500' : 'text-slate-300 hover:text-indigo-500'}`}
+                  >
+                    {task.status === 'done' ? <CheckCircle size={22} className="fill-emerald-50" /> : <Circle size={22} />}
+                  </button>
+                </td>
+                <td className="p-4">
+                  <div className={`font-medium text-slate-900 ${task.status === 'done' ? 'line-through text-slate-400' : ''}`}>{task.title}</div>
+                  {task.description && <div className="text-xs text-slate-500 truncate max-w-md mt-0.5">{task.description}</div>}
+                </td>
+                <td className="p-4">
+                  <span className={`text-[10px] px-2.5 py-1 rounded-full font-semibold uppercase tracking-wide ${PRIORITY_COLORS[task.priority]}`}>
+                    {PRIORITY_LABELS[task.priority]}
+                  </span>
+                </td>
+                <td className="p-4 text-sm text-slate-500 font-mono">
+                  {new Date(task.due_date).toLocaleDateString('pt-BR')}
+                </td>
+                <td className="p-4 text-right flex justify-end gap-2">
+                  <button 
+                    onClick={() => deleteTask(task.id)}
+                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                    title="Excluir"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        
+        {filteredTasks.length === 0 && (
+          <div className="p-12 text-center">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 mb-4">
+              <CheckCircle className="text-slate-400" size={24} />
+            </div>
+            <h3 className="text-slate-900 font-medium mb-1">Nenhuma tarefa encontrada</h3>
+            <p className="text-slate-500 text-sm">Tente ajustar sua busca ou adicione uma nova tarefa.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
