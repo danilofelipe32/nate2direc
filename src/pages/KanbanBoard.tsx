@@ -63,7 +63,7 @@ const TaskCard: React.FC<{ task: Task; onDelete: (id: number) => void; onClick: 
       <div
         ref={setNodeRef}
         style={style}
-        className="bg-white p-4 rounded-xl shadow-xl border-2 border-indigo-500 opacity-50 h-[100px] rotate-2"
+        className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-xl border-2 border-indigo-500 opacity-50 h-[100px] rotate-2"
       />
     );
   }
@@ -73,7 +73,7 @@ const TaskCard: React.FC<{ task: Task; onDelete: (id: number) => void; onClick: 
       ref={setNodeRef}
       style={style}
       onClick={() => onClick(task)}
-      className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 group hover:border-indigo-300 hover:shadow-md transition-all duration-200 cursor-pointer relative overflow-hidden pl-5"
+      className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 group hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-md transition-all duration-200 cursor-pointer relative overflow-hidden pl-5"
     >
       <div className={`absolute left-0 top-0 bottom-0 w-2 ${
         task.priority === 'high' ? 'bg-rose-500' : 
@@ -88,14 +88,14 @@ const TaskCard: React.FC<{ task: Task; onDelete: (id: number) => void; onClick: 
               task.priority === 'medium' ? 'bg-amber-500' : 
               'bg-emerald-500'
           }`} />
-          <div {...attributes} {...listeners} className="cursor-grab text-slate-400 hover:text-indigo-600" onClick={(e) => e.stopPropagation()}>
+          <div {...attributes} {...listeners} className="cursor-grab text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400" onClick={(e) => e.stopPropagation()}>
             <GripVertical size={16} />
           </div>
         </div>
         <div className="flex items-center gap-2">
           <button 
             onClick={(e) => { e.stopPropagation(); onComment(task); }} 
-            className="text-slate-300 hover:text-indigo-500 transition-colors opacity-0 group-hover:opacity-100 flex items-center gap-1"
+            className="text-slate-300 dark:text-slate-600 hover:text-indigo-500 transition-colors opacity-0 group-hover:opacity-100 flex items-center gap-1"
           >
             <MessageSquare size={16} />
             {task.comments && task.comments.length > 0 && (
@@ -104,27 +104,27 @@ const TaskCard: React.FC<{ task: Task; onDelete: (id: number) => void; onClick: 
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); onDelete(task.id); }} 
-            className="text-slate-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
+            className="text-slate-300 dark:text-slate-600 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
           >
             <Trash2 size={16} />
           </button>
         </div>
       </div>
       <div className="flex items-center gap-2 mb-2">
-        <h3 className="font-semibold text-slate-800 text-sm leading-tight truncate flex-1">{task.title}</h3>
+        <h3 className="font-semibold text-slate-800 dark:text-slate-100 text-sm leading-tight truncate flex-1">{task.title}</h3>
         {task.recurring && task.recurring !== 'none' && (
-          <div className="text-indigo-500" title={`Recorrência: ${task.recurring}`}>
+          <div className="text-indigo-500 dark:text-indigo-400" title={`Recorrência: ${task.recurring}`}>
             <Repeat size={14} />
           </div>
         )}
       </div>
       {task.comments && task.comments.length > 0 && (
-        <p className="text-[10px] text-slate-400 truncate mb-2">
+        <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate mb-2">
           {task.comments[task.comments.length - 1].text}
         </p>
       )}
       <div className="flex items-center justify-between mt-3">
-        <div className="text-xs text-slate-500 flex flex-col gap-0.5">
+        <div className="text-xs text-slate-500 dark:text-slate-400 flex flex-col gap-0.5">
           {task.startDate && (
             <p className="flex items-center gap-1">
               <Calendar size={10} /> Início: {new Date(task.startDate).toLocaleDateString('pt-BR')}
@@ -150,19 +150,19 @@ const Column: React.FC<{ id: string; title: string; tasks: Task[]; onDelete: (id
 
   const getColumnColor = (id: string) => {
     switch(id) {
-      case 'todo': return 'bg-slate-100 border-slate-200';
-      case 'in-progress': return 'bg-blue-50 border-blue-100';
-      case 'done': return 'bg-emerald-50 border-emerald-100';
-      default: return 'bg-slate-100';
+      case 'todo': return 'bg-slate-100 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800';
+      case 'in-progress': return 'bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-900/30';
+      case 'done': return 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-900/30';
+      default: return 'bg-slate-100 dark:bg-slate-900/50';
     }
   };
 
   const getHeaderColor = (id: string) => {
     switch(id) {
-      case 'todo': return 'text-slate-700';
-      case 'in-progress': return 'text-blue-700';
-      case 'done': return 'text-emerald-700';
-      default: return 'text-slate-700';
+      case 'todo': return 'text-slate-700 dark:text-slate-300';
+      case 'in-progress': return 'text-blue-700 dark:text-blue-400';
+      case 'done': return 'text-emerald-700 dark:text-emerald-400';
+      default: return 'text-slate-700 dark:text-slate-300';
     }
   };
 
@@ -171,7 +171,7 @@ const Column: React.FC<{ id: string; title: string; tasks: Task[]; onDelete: (id
       <div className="flex items-center justify-between mb-2">
         <h2 className={`font-bold flex items-center gap-2 ${getHeaderColor(id)}`}>
           {title}
-          <span className="bg-white text-slate-600 text-xs px-2 py-1 rounded-full shadow-sm border border-slate-100 font-mono">{tasks.length}</span>
+          <span className="bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs px-2 py-1 rounded-full shadow-sm border border-slate-100 dark:border-slate-700 font-mono">{tasks.length}</span>
         </h2>
       </div>
       <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
@@ -264,39 +264,39 @@ export const KanbanBoard: React.FC = () => {
     <div>
       <header className="mb-8 flex justify-between items-center flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Quadro Kanban</h1>
-          <p className="text-zinc-500">Gerencie suas tarefas visualmente</p>
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Quadro Kanban</h1>
+          <p className="text-zinc-500 dark:text-zinc-400">Gerencie suas tarefas visualmente</p>
         </div>
         <div className="flex gap-2 items-center flex-wrap">
-          <div className="flex items-center gap-2 bg-white p-1.5 rounded-lg border border-slate-200 shadow-sm">
+          <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
             <input 
               type="date" 
-              className="p-1.5 border-none text-xs text-slate-600 focus:outline-none"
+              className="p-1.5 border-none text-xs text-slate-600 dark:text-slate-300 focus:outline-none bg-transparent"
               value={dateRange.startDate}
               onChange={e => setDateRange({ ...dateRange, startDate: e.target.value })}
               title="Data Inicial"
             />
-            <span className="text-slate-300">-</span>
+            <span className="text-slate-300 dark:text-slate-700">-</span>
             <input 
               type="date" 
-              className="p-1.5 border-none text-xs text-slate-600 focus:outline-none"
+              className="p-1.5 border-none text-xs text-slate-600 dark:text-slate-300 focus:outline-none bg-transparent"
               value={dateRange.endDate}
               onChange={e => setDateRange({ ...dateRange, endDate: e.target.value })}
               title="Data Final"
             />
           </div>
-          <span className="text-sm text-zinc-500 mr-2">Filtrar:</span>
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 mr-2">Filtrar:</span>
           {(['all', 'low', 'medium', 'high'] as const).map((priority) => (
             <button
               key={priority}
               onClick={() => setFilterPriority(priority)}
               className={`px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-200 border ${
                 filterPriority === priority
-                  ? priority === 'all' ? 'bg-zinc-900 text-white border-zinc-900' :
+                  ? priority === 'all' ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-zinc-900 dark:border-zinc-100' :
                     priority === 'low' ? 'bg-emerald-500 text-white border-emerald-500' :
                     priority === 'medium' ? 'bg-amber-500 text-white border-amber-500' :
                     'bg-rose-500 text-white border-rose-500'
-                  : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-400'
+                  : 'bg-white dark:bg-slate-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-slate-800 hover:border-zinc-400 dark:hover:border-slate-600'
               }`}
             >
               {priority === 'all' ? 'Todas' : PRIORITY_LABELS[priority]}

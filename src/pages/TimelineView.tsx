@@ -92,9 +92,9 @@ const DroppableCell: React.FC<{ date: Date; taskId: number; children?: React.Rea
   return (
     <div
       ref={setNodeRef}
-      className={`h-12 border-r border-b border-slate-100 min-w-[60px] relative transition-colors ${
-        isOver ? 'bg-indigo-50/50' : ''
-      } ${isToday(date) ? 'bg-slate-50/30' : ''}`}
+      className={`h-12 border-r border-b border-slate-100 dark:border-slate-800/50 min-w-[60px] relative transition-colors ${
+        isOver ? 'bg-indigo-50/50 dark:bg-indigo-900/30' : ''
+      } ${isToday(date) ? 'bg-slate-50/30 dark:bg-slate-800/20' : ''}`}
     >
       <div className="absolute inset-1">
         {children}
@@ -181,8 +181,7 @@ export const TimelineView: React.FC = () => {
 
   const navigateToday = () => {
     setCurrentDate(new Date());
-    setCustomStartDate('');
-    setCustomEndDate('');
+    setDateRange({ startDate: '', endDate: '' });
   };
   
   const navigatePrev = () => setCurrentDate(subDays(currentDate, 7));
@@ -197,28 +196,28 @@ export const TimelineView: React.FC = () => {
     <div className="h-full flex flex-col space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Cronograma Gantt</h1>
-          <p className="text-slate-500 text-sm">Arraste as tarefas para reagendar ou clique para editar</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Cronograma Gantt</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">Arraste as tarefas para reagendar ou clique para editar</p>
         </div>
         
         <div className="flex flex-wrap items-center gap-3">
           {/* Date Range Filter Inputs */}
-          <div className="flex items-center gap-2 bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm">
-            <div className="flex items-center gap-2 px-2 border-r border-slate-100">
-              <Filter size={14} className="text-slate-400" />
-              <span className="text-xs font-medium text-slate-500">Filtrar:</span>
+          <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="flex items-center gap-2 px-2 border-r border-slate-100 dark:border-slate-800">
+              <Filter size={14} className="text-slate-400 dark:text-slate-600" />
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Filtrar:</span>
             </div>
             <input 
               type="date" 
-              className="p-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 focus:outline-none focus:border-indigo-500"
+              className="p-1.5 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:border-indigo-500 bg-transparent"
               value={dateRange.startDate}
               onChange={e => setDateRange({ ...dateRange, startDate: e.target.value })}
               title="Data Inicial"
             />
-            <span className="text-slate-300">-</span>
+            <span className="text-slate-300 dark:text-slate-700">-</span>
             <input 
               type="date" 
-              className="p-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 focus:outline-none focus:border-indigo-500"
+              className="p-1.5 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:border-indigo-500 bg-transparent"
               value={dateRange.endDate}
               onChange={e => setDateRange({ ...dateRange, endDate: e.target.value })}
               title="Data Final"
@@ -226,7 +225,7 @@ export const TimelineView: React.FC = () => {
             {(dateRange.startDate || dateRange.endDate) && (
               <button 
                 onClick={clearFilters}
-                className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors"
                 title="Limpar filtros"
               >
                 <X size={14} />
@@ -236,15 +235,15 @@ export const TimelineView: React.FC = () => {
 
           {/* Navigation Controls - Only show if not filtering */}
           {(!dateRange.startDate && !dateRange.endDate) && (
-            <div className="flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
-              <button onClick={navigatePrev} className="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors">
+            <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <button onClick={navigatePrev} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-400 transition-colors">
                 <ChevronLeft size={20} />
               </button>
-              <button onClick={navigateToday} className="px-4 py-2 font-medium text-sm text-slate-700 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-2">
+              <button onClick={navigateToday} className="px-4 py-2 font-medium text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-2">
                 <CalendarIcon size={16} />
                 Hoje
               </button>
-              <button onClick={navigateNext} className="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors">
+              <button onClick={navigateNext} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-400 transition-colors">
                 <ChevronRight size={20} />
               </button>
             </div>
@@ -257,22 +256,22 @@ export const TimelineView: React.FC = () => {
         onDragStart={handleDragStart} 
         onDragEnd={handleDragEnd}
       >
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col flex-1 min-h-[600px]">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col flex-1 min-h-[600px]">
           {/* Header Row */}
-          <div className="flex border-b border-slate-200 bg-slate-50">
-            <div className="w-64 flex-shrink-0 p-4 font-semibold text-slate-600 text-sm border-r border-slate-200 bg-slate-50 z-10">
+          <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+            <div className="w-64 flex-shrink-0 p-4 font-semibold text-slate-600 dark:text-slate-400 text-sm border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 z-10">
               Tarefa
             </div>
             <div className="flex overflow-x-auto hide-scrollbar">
               {days.map(day => (
                 <div 
                   key={day.toISOString()} 
-                  className={`min-w-[60px] p-2 text-center border-r border-slate-200 flex-shrink-0 ${isToday(day) ? 'bg-indigo-50/50' : ''}`}
+                  className={`min-w-[60px] p-2 text-center border-r border-slate-200 dark:border-slate-800 flex-shrink-0 ${isToday(day) ? 'bg-indigo-50/50 dark:bg-indigo-900/20' : ''}`}
                 >
-                  <div className={`text-xs font-medium uppercase mb-1 ${isToday(day) ? 'text-indigo-600' : 'text-slate-400'}`}>
+                  <div className={`text-xs font-medium uppercase mb-1 ${isToday(day) ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-600'}`}>
                     {format(day, 'EEE', { locale: ptBR })}
                   </div>
-                  <div className={`text-sm font-bold w-8 h-8 rounded-full flex items-center justify-center mx-auto ${isToday(day) ? 'bg-indigo-600 text-white' : 'text-slate-700'}`}>
+                  <div className={`text-sm font-bold w-8 h-8 rounded-full flex items-center justify-center mx-auto ${isToday(day) ? 'bg-indigo-600 text-white' : 'text-slate-700 dark:text-slate-300'}`}>
                     {format(day, 'd')}
                   </div>
                 </div>
@@ -283,9 +282,9 @@ export const TimelineView: React.FC = () => {
           {/* Body */}
           <div className="overflow-auto flex-1">
             {filteredTasks.map(task => (
-              <div key={task.id} className="flex hover:bg-slate-50/50 transition-colors">
+              <div key={task.id} className="flex hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
                 {/* Task Name Column */}
-                <div className="w-64 flex-shrink-0 p-3 border-r border-slate-200 border-b border-slate-100 flex items-center justify-between bg-white sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                <div className="w-64 flex-shrink-0 p-3 border-r border-slate-200 dark:border-slate-800 border-b border-slate-100 dark:border-slate-800/50 flex items-center justify-between bg-white dark:bg-slate-900 sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
                   <div className="flex items-center gap-2 truncate">
                     <div className={`w-2 h-2 rounded-full ${
                       task.priority === 'high' ? 'bg-rose-500' : 
@@ -293,12 +292,12 @@ export const TimelineView: React.FC = () => {
                       'bg-emerald-500'
                     }`} />
                     <div 
-                      className="truncate text-sm font-medium text-slate-700 cursor-pointer hover:text-indigo-600 transition-colors" 
+                      className="truncate text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" 
                       title={task.title}
                       onClick={() => setEditingTask(task)}
                     >
                       {task.title}
-                      <div className="text-[10px] text-slate-400">
+                      <div className="text-[10px] text-slate-400 dark:text-slate-500">
                         {task.startDate && <span>{new Date(task.startDate).toLocaleDateString('pt-BR')}</span>}
                         {task.startDate && task.endDate && <span> - </span>}
                         {task.endDate && <span>{new Date(task.endDate).toLocaleDateString('pt-BR')}</span>}
@@ -307,7 +306,7 @@ export const TimelineView: React.FC = () => {
                   </div>
                   <button 
                     onClick={() => setCommentingTask(task)}
-                    className="text-slate-400 hover:text-indigo-600 transition-colors flex items-center gap-1"
+                    className="text-slate-400 dark:text-slate-600 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-1"
                     title="Comentários"
                   >
                     <MessageSquare size={14} />
@@ -332,7 +331,7 @@ export const TimelineView: React.FC = () => {
             ))}
             
             {filteredTasks.length === 0 && (
-              <div className="p-12 text-center text-slate-400 italic">
+              <div className="p-12 text-center text-slate-400 dark:text-slate-600 italic">
                 {tasks.length === 0 ? "Nenhuma tarefa criada." : "Nenhuma tarefa encontrada neste intervalo."}
               </div>
             )}

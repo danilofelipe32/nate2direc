@@ -86,13 +86,13 @@ export const DashboardView: React.FC = () => {
   // --- Components ---
 
   const StatCard = ({ title, value, icon: Icon, color, subtext }: any) => (
-    <div className="relative overflow-hidden bg-white/40 backdrop-blur-xl border border-white/50 p-6 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 group">
+    <div className="relative overflow-hidden bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/50 dark:border-slate-800/50 p-6 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 group">
       <div className={`absolute -right-6 -top-6 w-24 h-24 rounded-full opacity-10 group-hover:scale-110 transition-transform duration-500 ${color.bg}`} />
       <div className="flex items-start justify-between relative z-10">
         <div>
-          <p className="text-sm font-medium text-slate-600 mb-1">{title}</p>
-          <h3 className="text-3xl font-bold text-slate-800 tracking-tight">{value}</h3>
-          {subtext && <p className="text-xs text-slate-500 mt-1">{subtext}</p>}
+          <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">{title}</p>
+          <h3 className="text-3xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">{value}</h3>
+          {subtext && <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">{subtext}</p>}
         </div>
         <div className={`p-3 rounded-2xl ${color.bg} ${color.text} shadow-sm group-hover:rotate-12 transition-transform duration-300`}>
           <Icon size={24} />
@@ -105,35 +105,35 @@ export const DashboardView: React.FC = () => {
     <div className="min-h-screen space-y-8 pb-10 relative">
       {/* Background Blobs */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-400/20 blur-[100px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-rose-400/20 blur-[100px]" />
-        <div className="absolute top-[20%] right-[20%] w-[30%] h-[30%] rounded-full bg-emerald-400/20 blur-[100px]" />
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-400/20 dark:bg-indigo-900/20 blur-[100px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-rose-400/20 dark:bg-rose-900/20 blur-[100px]" />
+        <div className="absolute top-[20%] right-[20%] w-[30%] h-[30%] rounded-full bg-emerald-400/20 dark:bg-emerald-900/20 blur-[100px]" />
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
-          <p className="text-slate-500 mt-1">Visão geral da sua produtividade e métricas.</p>
+          <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Dashboard</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Visão geral da sua produtividade e métricas.</p>
         </div>
-        <div className="flex items-center gap-2 text-sm font-medium text-slate-600 bg-white/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/60 shadow-sm">
+        <div className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/60 dark:border-slate-800/60 shadow-sm">
           <div className="flex items-center gap-2">
             <input 
               type="date" 
-              className="p-1 border-none text-xs text-slate-600 focus:outline-none bg-transparent"
+              className="p-1 border-none text-xs text-slate-600 dark:text-slate-300 focus:outline-none bg-transparent"
               value={dateRange.startDate}
               onChange={e => setDateRange({ ...dateRange, startDate: e.target.value })}
               title="Data Inicial"
             />
-            <span className="text-slate-300">-</span>
+            <span className="text-slate-300 dark:text-slate-700">-</span>
             <input 
               type="date" 
-              className="p-1 border-none text-xs text-slate-600 focus:outline-none bg-transparent"
+              className="p-1 border-none text-xs text-slate-600 dark:text-slate-300 focus:outline-none bg-transparent"
               value={dateRange.endDate}
               onChange={e => setDateRange({ ...dateRange, endDate: e.target.value })}
               title="Data Final"
             />
           </div>
-          <CalendarDays size={16} className="text-indigo-600" />
+          <CalendarDays size={16} className="text-indigo-600 dark:text-indigo-400" />
           {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
         </div>
       </div>
@@ -173,13 +173,13 @@ export const DashboardView: React.FC = () => {
       {/* Main Charts Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Weekly Workload - Area Chart */}
-        <div className="lg:col-span-2 bg-white/40 backdrop-blur-xl border border-white/50 p-8 rounded-3xl shadow-lg flex flex-col h-[400px]">
+        <div className="lg:col-span-2 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/50 dark:border-slate-800/50 p-8 rounded-3xl shadow-lg flex flex-col h-[400px]">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-              <TrendingUp size={20} className="text-indigo-600" />
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+              <TrendingUp size={20} className="text-indigo-600 dark:text-indigo-400" />
               Carga de Trabalho Semanal
             </h3>
-            <span className="text-xs font-medium px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full border border-indigo-100">
+            <span className="text-xs font-medium px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full border border-indigo-100 dark:border-indigo-800">
               Próximos 7 dias
             </span>
           </div>
@@ -229,9 +229,9 @@ export const DashboardView: React.FC = () => {
         </div>
 
         {/* Priority Distribution - Radial Bar or Pie */}
-        <div className="bg-white/40 backdrop-blur-xl border border-white/50 p-8 rounded-3xl shadow-lg flex flex-col h-[400px]">
-          <h3 className="text-lg font-bold mb-6 text-slate-800 flex items-center gap-2">
-            <Activity size={20} className="text-emerald-600" />
+        <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/50 dark:border-slate-800/50 p-8 rounded-3xl shadow-lg flex flex-col h-[400px]">
+          <h3 className="text-lg font-bold mb-6 text-slate-800 dark:text-slate-100 flex items-center gap-2">
+            <Activity size={20} className="text-emerald-600 dark:text-emerald-400" />
             Distribuição
           </h3>
           <div className="flex-1 w-full relative">
@@ -285,28 +285,28 @@ export const DashboardView: React.FC = () => {
       {/* Bottom Section: Upcoming & Priorities */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Upcoming Deadlines List */}
-        <div className="lg:col-span-1 bg-white/40 backdrop-blur-xl border border-white/50 p-8 rounded-3xl shadow-lg h-[350px] flex flex-col">
-          <h3 className="text-lg font-bold mb-4 text-slate-800 flex items-center gap-2">
-            <Clock size={20} className="text-amber-500" />
+        <div className="lg:col-span-1 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/50 dark:border-slate-800/50 p-8 rounded-3xl shadow-lg h-[350px] flex flex-col">
+          <h3 className="text-lg font-bold mb-4 text-slate-800 dark:text-slate-100 flex items-center gap-2">
+            <Clock size={20} className="text-amber-500 dark:text-amber-400" />
             Próximos Prazos
           </h3>
           <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
             {upcomingDeadlines.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-slate-400">
+              <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
                 <CheckCircle2 size={32} className="mb-2 opacity-50" />
                 <p className="text-sm">Tudo em dia!</p>
               </div>
             ) : (
               upcomingDeadlines.map(task => (
-                <div key={task.id} className="flex items-center gap-3 p-3 bg-white/60 rounded-xl border border-white/50 shadow-sm hover:shadow-md transition-all">
+                <div key={task.id} className="flex items-center gap-3 p-3 bg-white/60 dark:bg-slate-800/60 rounded-xl border border-white/50 dark:border-slate-700/50 shadow-sm hover:shadow-md transition-all">
                   <div className={`w-1.5 h-10 rounded-full ${
                     task.priority === 'high' ? 'bg-rose-500' : 
                     task.priority === 'medium' ? 'bg-amber-500' : 
                     'bg-emerald-500'
                   }`} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-800 truncate">{task.title}</p>
-                    <p className="text-xs text-slate-500 flex items-center gap-1">
+                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">{task.title}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
                       <CalendarDays size={10} />
                       {format(parseISO(task.due_date), "d 'de' MMM", { locale: ptBR })}
                     </p>
@@ -321,9 +321,9 @@ export const DashboardView: React.FC = () => {
         </div>
 
         {/* Priority Bar Chart */}
-        <div className="lg:col-span-2 bg-white/40 backdrop-blur-xl border border-white/50 p-8 rounded-3xl shadow-lg h-[350px] flex flex-col">
-          <h3 className="text-lg font-bold mb-6 text-slate-800 flex items-center gap-2">
-            <AlertOctagon size={20} className="text-rose-500" />
+        <div className="lg:col-span-2 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/50 dark:border-slate-800/50 p-8 rounded-3xl shadow-lg h-[350px] flex flex-col">
+          <h3 className="text-lg font-bold mb-6 text-slate-800 dark:text-slate-100 flex items-center gap-2">
+            <AlertOctagon size={20} className="text-rose-500 dark:text-rose-400" />
             Tarefas por Prioridade
           </h3>
           <div className="flex-1 w-full">
