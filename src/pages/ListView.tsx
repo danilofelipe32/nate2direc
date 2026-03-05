@@ -3,6 +3,7 @@ import { useTasks, Task } from '../context/TaskContext';
 import { Edit2, Trash2, CheckCircle, Circle, AlertCircle, GripVertical, MessageSquare } from 'lucide-react';
 import { parseISO, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 import { CommentModal } from '../components/CommentModal';
+import { EditTaskModal } from '../components/EditTaskModal';
 import {
   DndContext,
   closestCenter,
@@ -50,9 +51,10 @@ interface SortableTaskRowProps {
   updateTaskStatus: (id: number, status: string) => Promise<void>;
   deleteTask: (id: number) => Promise<void>;
   onCommentClick: (task: Task) => void;
+  onEditClick: (task: Task) => void;
 }
 
-const SortableTaskRow: React.FC<SortableTaskRowProps> = ({ task, updateTaskStatus, deleteTask, onCommentClick }) => {
+const SortableTaskRow: React.FC<SortableTaskRowProps> = ({ task, updateTaskStatus, deleteTask, onCommentClick, onEditClick }) => {
   const {
     attributes,
     listeners,
@@ -89,7 +91,7 @@ const SortableTaskRow: React.FC<SortableTaskRowProps> = ({ task, updateTaskStatu
           {task.status === 'done' ? <CheckCircle size={22} className="fill-emerald-50" /> : <Circle size={22} />}
         </button>
       </td>
-      <td className="p-4">
+      <td className="p-4 cursor-pointer" onClick={() => onEditClick(task)}>
         <div className={`font-medium text-slate-900 ${task.status === 'done' ? 'line-through text-slate-400' : ''}`}>{task.title}</div>
         {task.description && <div className="text-xs text-slate-500 truncate max-w-md mt-0.5">{task.description}</div>}
       </td>
@@ -131,6 +133,7 @@ export const ListView: React.FC = () => {
   const [filter, setFilter] = useState('');
   const [orderedTasks, setOrderedTasks] = useState<Task[]>([]);
   const [commentingTask, setCommentingTask] = useState<Task | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   React.useEffect(() => {
     setOrderedTasks(tasks);
@@ -232,6 +235,7 @@ export const ListView: React.FC = () => {
                     updateTaskStatus={updateTaskStatus} 
                     deleteTask={deleteTask} 
                     onCommentClick={setCommentingTask}
+                    onEditClick={setEditingTask}
                   />
                 ))}
               </SortableContext>
@@ -243,6 +247,17 @@ export const ListView: React.FC = () => {
           <CommentModal
             task={commentingTask}
             onClose={() => setCommentingTask(null)}
+          />
+        )}
+        
+        {editingTask && (
+          <EditTaskModal
+            task={editingTask}
+            onClose={() => setEditingTask(null)}
+            onSave={async (updatedTask) => {
+              await updateTask(updatedTask);
+              setEditingTask(null);
+            }}
           />
         )}
         

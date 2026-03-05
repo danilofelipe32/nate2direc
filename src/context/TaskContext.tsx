@@ -87,7 +87,9 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
           status: updatedTask.status,
           priority: updatedTask.priority,
           recurring: updatedTask.recurring,
-          comments: updatedTask.comments
+          comments: updatedTask.comments,
+          startDate: updatedTask.startDate,
+          endDate: updatedTask.endDate
         })
       });
       setTasks(tasks.map(t => t.id === updatedTask.id ? updatedTask : t));

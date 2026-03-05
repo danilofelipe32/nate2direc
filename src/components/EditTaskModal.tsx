@@ -14,7 +14,8 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, onClose, onS
   const { addComment } = useTasks();
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || '');
-  const [dueDate, setDueDate] = useState(task.due_date ? new Date(task.due_date).toISOString().split('T')[0] : '');
+  const [startDate, setStartDate] = useState(task.startDate ? new Date(task.startDate).toISOString().split('T')[0] : '');
+  const [endDate, setEndDate] = useState(task.endDate ? new Date(task.endDate).toISOString().split('T')[0] : '');
   const [priority, setPriority] = useState(task.priority);
   const [status, setStatus] = useState(task.status);
   const [recurring, setRecurring] = useState(task.recurring || 'none');
@@ -25,7 +26,9 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, onClose, onS
       ...task,
       title,
       description,
-      due_date: new Date(dueDate).toISOString(),
+      due_date: endDate ? new Date(endDate).toISOString() : task.due_date,
+      startDate: startDate ? new Date(startDate).toISOString() : undefined,
+      endDate: endDate ? new Date(endDate).toISOString() : undefined,
       priority,
       status,
       recurring
@@ -85,16 +88,29 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, onClose, onS
           <div className="grid grid-cols-2 gap-5">
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <Calendar size={14} /> Vencimento
+                <Calendar size={14} /> Data Inicial
               </label>
               <input
                 type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
                 className="w-full p-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-slate-600"
               />
             </div>
             <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <Calendar size={14} /> Data Final
+              </label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full p-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-slate-600"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-5">
+             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <Flag size={14} /> Prioridade
               </label>
@@ -113,9 +129,7 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, onClose, onS
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-5">
              <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <CheckCircle size={14} /> Status
@@ -135,7 +149,9 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, onClose, onS
                 </div>
               </div>
             </div>
-            
+          </div>
+
+          <div className="grid grid-cols-2 gap-5">
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <Repeat size={14} /> Recorrência
@@ -157,7 +173,7 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, onClose, onS
               </div>
             </div>
           </div>
-
+          
           {/* Comments Section */}
           <div className="pt-4 border-t border-slate-100">
             <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
