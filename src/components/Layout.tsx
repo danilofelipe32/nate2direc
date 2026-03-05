@@ -27,6 +27,13 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             to="/" 
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isActive('/') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-900/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
           >
+            <LayoutDashboard size={20} />
+            <span className="font-medium">Dashboard</span>
+          </Link>
+          <Link 
+            to="/kanban" 
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isActive('/kanban') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-900/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+          >
             <Kanban size={20} />
             <span className="font-medium">Quadro Kanban</span>
           </Link>
@@ -43,13 +50,6 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           >
             <Calendar size={20} />
             <span className="font-medium">Timeline</span>
-          </Link>
-          <Link 
-            to="/dashboard" 
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isActive('/dashboard') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-900/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
-          >
-            <LayoutDashboard size={20} />
-            <span className="font-medium">Dashboard</span>
           </Link>
         </nav>
 

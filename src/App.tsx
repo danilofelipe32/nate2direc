@@ -13,10 +13,11 @@ export default function App() {
       <Router>
         <Layout>
           <Routes>
-            <Route path="/" element={<KanbanBoard />} />
+            <Route path="/" element={<DashboardView />} />
+            <Route path="/kanban" element={<KanbanBoard />} />
             <Route path="/list" element={<ListView />} />
             <Route path="/timeline" element={<TimelineView />} />
-            <Route path="/dashboard" element={<DashboardView />} />
+            <Route path="/dashboard" element={<Navigate to="/" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Layout>
