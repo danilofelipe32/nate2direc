@@ -34,14 +34,17 @@ interface TaskContextType {
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
+const STORAGE_KEY = 'tasks_db';
+
 export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
 
   const fetchTasks = () => {
-    fetch('/api/tasks')
-      .then(res => res.json())
-      .then(data => {
+    const storedTasks = localStorage.getItem(STORAGE_KEY);
+    if (storedTasks) {
+      try {
+        const data = JSON.parse(storedTasks);
         const validTasks = data.map((t: any) => ({
           ...t,
           status: ['todo', 'in-progress', 'done'].includes(t.status) ? t.status : 'todo',
@@ -50,76 +53,56 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
           comments: Array.isArray(t.comments) ? t.comments : []
         }));
         setTasks(validTasks);
-      });
+      } catch (error) {
+        console.error("Error parsing stored tasks:", error);
+        setTasks([]);
+      }
+    } else {
+      setTasks([]);
+    }
   };
 
   useEffect(() => {
     fetchTasks();
   }, []);
 
+  const saveToStorage = (newTasks: Task[]) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newTasks));
+    setTasks(newTasks);
+  };
+
   const refreshTasks = () => fetchTasks();
 
   const addTask = async (title: string, priority: 'low' | 'medium' | 'high', startDate: string, endDate: string, recurring: 'none' | 'daily' | 'weekly' | 'monthly' = 'none') => {
-    try {
-      const res = await fetch('/api/tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description: '', due_date: endDate, startDate, endDate, priority, recurring, comments: [] })
-      });
-      if (!res.ok) throw new Error('Failed to add task');
-      const newTask = await res.json();
-      setTasks([...tasks, { id: newTask.id, title, description: '', due_date: endDate, status: 'todo', priority, recurring, comments: [], startDate, endDate }]);
-    } catch (error) {
-      console.error("Error adding task:", error);
-      alert("Falha ao adicionar tarefa.");
-    }
+    const newTask: Task = {
+      id: Date.now(),
+      title,
+      description: '',
+      due_date: endDate + 'T23:59:59Z',
+      status: 'todo',
+      priority,
+      recurring,
+      comments: [],
+      startDate,
+      endDate
+    };
+    const updatedTasks = [...tasks, newTask];
+    saveToStorage(updatedTasks);
   };
 
   const updateTask = async (updatedTask: Task) => {
-    try {
-      await fetch(`/api/tasks/${updatedTask.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: updatedTask.title,
-          description: updatedTask.description,
-          due_date: updatedTask.due_date,
-          status: updatedTask.status,
-          priority: updatedTask.priority,
-          recurring: updatedTask.recurring,
-          comments: updatedTask.comments,
-          startDate: updatedTask.startDate,
-          endDate: updatedTask.endDate
-        })
-      });
-      setTasks(tasks.map(t => t.id === updatedTask.id ? updatedTask : t));
-    } catch (error) {
-      console.error("Failed to update task", error);
-      alert("Falha ao atualizar tarefa.");
-    }
+    const updatedTasks = tasks.map(t => t.id === updatedTask.id ? updatedTask : t);
+    saveToStorage(updatedTasks);
   };
 
   const deleteTask = async (id: number) => {
-    try {
-      await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
-      setTasks(tasks.filter(t => t.id !== id));
-    } catch (error) {
-      console.error("Failed to delete task", error);
-      alert("Falha ao deletar tarefa.");
-    }
+    const updatedTasks = tasks.filter(t => t.id !== id);
+    saveToStorage(updatedTasks);
   };
 
   const updateTaskStatus = async (id: number, status: string) => {
-    try {
-      await fetch(`/api/tasks/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      });
-      setTasks(tasks.map(t => t.id === id ? { ...t, status: status as any } : t));
-    } catch (error) {
-      console.error("Failed to update status", error);
-    }
+    const updatedTasks = tasks.map(t => t.id === id ? { ...t, status: status as any } : t);
+    saveToStorage(updatedTasks);
   };
 
   const addComment = async (taskId: number, text: string) => {
