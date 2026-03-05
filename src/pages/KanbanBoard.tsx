@@ -23,6 +23,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { useTasks, Task } from '../context/TaskContext';
 import { EditTaskModal } from '../components/EditTaskModal';
 import { CommentModal } from '../components/CommentModal';
+import { parseISO, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 
 const COLUMNS = [
   { id: 'todo', title: 'A Fazer' },
@@ -176,11 +177,25 @@ const Column: React.FC<{ id: string; title: string; tasks: Task[]; onDelete: (id
 };
 
 export const KanbanBoard: React.FC = () => {
-  const { tasks, deleteTask, updateTaskStatus, updateTask } = useTasks();
+  const { tasks, deleteTask, updateTaskStatus, updateTask, dateRange, setDateRange } = useTasks();
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [commentingTask, setCommentingTask] = useState<Task | null>(null);
   const [filterPriority, setFilterPriority] = useState<'all' | 'low' | 'medium' | 'high'>('all');
+
+  const filteredTasks = tasks.filter(task => {
+    const matchesPriority = filterPriority === 'all' || task.priority === filterPriority;
+    
+    let matchesDate = true;
+    if (dateRange.startDate && dateRange.endDate) {
+      const taskDate = parseISO(task.due_date);
+      matchesDate = isWithinInterval(taskDate, { 
+        start: startOfDay(parseISO(dateRange.startDate)), 
+        end: endOfDay(parseISO(dateRange.endDate)) 
+      });
+    }
+    return matchesPriority && matchesDate;
+  });
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 3 } }),
@@ -244,6 +259,23 @@ export const KanbanBoard: React.FC = () => {
           <p className="text-zinc-500">Gerencie suas tarefas visualmente</p>
         </div>
         <div className="flex gap-2 items-center flex-wrap">
+          <div className="flex items-center gap-2 bg-white p-1.5 rounded-lg border border-slate-200 shadow-sm">
+            <input 
+              type="date" 
+              className="p-1.5 border-none text-xs text-slate-600 focus:outline-none"
+              value={dateRange.startDate}
+              onChange={e => setDateRange({ ...dateRange, startDate: e.target.value })}
+              title="Data Inicial"
+            />
+            <span className="text-slate-300">-</span>
+            <input 
+              type="date" 
+              className="p-1.5 border-none text-xs text-slate-600 focus:outline-none"
+              value={dateRange.endDate}
+              onChange={e => setDateRange({ ...dateRange, endDate: e.target.value })}
+              title="Data Final"
+            />
+          </div>
           <span className="text-sm text-zinc-500 mr-2">Filtrar:</span>
           {(['all', 'low', 'medium', 'high'] as const).map((priority) => (
             <button
@@ -277,7 +309,7 @@ export const KanbanBoard: React.FC = () => {
               key={col.id}
               id={col.id}
               title={col.title}
-              tasks={tasks.filter((t) => (t.status === col.id) && (filterPriority === 'all' || t.priority === filterPriority))}
+              tasks={filteredTasks.filter((t) => t.status === col.id)}
               onDelete={deleteTask}
               onTaskClick={setEditingTask}
               onCommentClick={setCommentingTask}

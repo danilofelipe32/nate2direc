@@ -9,27 +9,51 @@ import {
   CheckCircle2, AlertOctagon, Clock, Activity, 
   TrendingUp, CalendarDays, ListTodo, Zap 
 } from 'lucide-react';
-import { format, addDays, isSameDay, parseISO, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns';
+import { format, addDays, isSameDay, parseISO, startOfWeek, endOfWeek, eachDayOfInterval, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#f43f5e'];
 
 export const DashboardView: React.FC = () => {
-  const { tasks } = useTasks();
+  const { tasks, dateRange, setDateRange } = useTasks();
 
   // --- Data Processing ---
 
-  const statusData = useMemo(() => [
-    { name: 'A Fazer', value: tasks.filter(t => t.status === 'todo').length, color: '#6366f1' },
-    { name: 'Em Progresso', value: tasks.filter(t => t.status === 'in-progress').length, color: '#f59e0b' },
-    { name: 'Concluído', value: tasks.filter(t => t.status === 'done').length, color: '#10b981' },
-  ], [tasks]);
+  const statusData = useMemo(() => {
+    let filtered = tasks;
+    if (dateRange.startDate && dateRange.endDate) {
+      filtered = tasks.filter(task => {
+        const taskDate = parseISO(task.due_date);
+        return isWithinInterval(taskDate, { 
+          start: startOfDay(parseISO(dateRange.startDate)), 
+          end: endOfDay(parseISO(dateRange.endDate)) 
+        });
+      });
+    }
+    return [
+      { name: 'A Fazer', value: filtered.filter(t => t.status === 'todo').length, color: '#6366f1' },
+      { name: 'Em Progresso', value: filtered.filter(t => t.status === 'in-progress').length, color: '#f59e0b' },
+      { name: 'Concluído', value: filtered.filter(t => t.status === 'done').length, color: '#10b981' },
+    ];
+  }, [tasks, dateRange]);
 
-  const priorityData = useMemo(() => [
-    { name: 'Baixa', value: tasks.filter(t => t.priority === 'low').length, fill: '#10b981' },
-    { name: 'Média', value: tasks.filter(t => t.priority === 'medium').length, fill: '#f59e0b' },
-    { name: 'Alta', value: tasks.filter(t => t.priority === 'high').length, fill: '#f43f5e' },
-  ], [tasks]);
+  const priorityData = useMemo(() => {
+    let filtered = tasks;
+    if (dateRange.startDate && dateRange.endDate) {
+      filtered = tasks.filter(task => {
+        const taskDate = parseISO(task.due_date);
+        return isWithinInterval(taskDate, { 
+          start: startOfDay(parseISO(dateRange.startDate)), 
+          end: endOfDay(parseISO(dateRange.endDate)) 
+        });
+      });
+    }
+    return [
+      { name: 'Baixa', value: filtered.filter(t => t.priority === 'low').length, fill: '#10b981' },
+      { name: 'Média', value: filtered.filter(t => t.priority === 'medium').length, fill: '#f59e0b' },
+      { name: 'Alta', value: filtered.filter(t => t.priority === 'high').length, fill: '#f43f5e' },
+    ];
+  }, [tasks, dateRange]);
 
   const overdueTasks = tasks.filter(t => new Date(t.due_date) < new Date() && t.status !== 'done');
   const completionRate = tasks.length > 0 ? Math.round((tasks.filter(t => t.status === 'done').length / tasks.length) * 100) : 0;
@@ -92,6 +116,23 @@ export const DashboardView: React.FC = () => {
           <p className="text-slate-500 mt-1">Visão geral da sua produtividade e métricas.</p>
         </div>
         <div className="flex items-center gap-2 text-sm font-medium text-slate-600 bg-white/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/60 shadow-sm">
+          <div className="flex items-center gap-2">
+            <input 
+              type="date" 
+              className="p-1 border-none text-xs text-slate-600 focus:outline-none bg-transparent"
+              value={dateRange.startDate}
+              onChange={e => setDateRange({ ...dateRange, startDate: e.target.value })}
+              title="Data Inicial"
+            />
+            <span className="text-slate-300">-</span>
+            <input 
+              type="date" 
+              className="p-1 border-none text-xs text-slate-600 focus:outline-none bg-transparent"
+              value={dateRange.endDate}
+              onChange={e => setDateRange({ ...dateRange, endDate: e.target.value })}
+              title="Data Final"
+            />
+          </div>
           <CalendarDays size={16} className="text-indigo-600" />
           {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
         </div>

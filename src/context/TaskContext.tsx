@@ -28,12 +28,15 @@ interface TaskContextType {
   updateTaskStatus: (id: number, status: string) => Promise<void>;
   addComment: (taskId: number, text: string) => Promise<void>;
   refreshTasks: () => void;
+  dateRange: { startDate: string; endDate: string };
+  setDateRange: (range: { startDate: string; endDate: string }) => void;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
 
   const fetchTasks = () => {
     fetch('/api/tasks')
@@ -135,7 +138,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <TaskContext.Provider value={{ tasks, addTask, updateTask, deleteTask, updateTaskStatus, addComment, refreshTasks }}>
+    <TaskContext.Provider value={{ tasks, addTask, updateTask, deleteTask, updateTaskStatus, addComment, refreshTasks, dateRange, setDateRange }}>
       {children}
     </TaskContext.Provider>
   );

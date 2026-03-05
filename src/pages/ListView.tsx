@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTasks, Task } from '../context/TaskContext';
 import { Edit2, Trash2, CheckCircle, Circle, AlertCircle, GripVertical, MessageSquare } from 'lucide-react';
+import { parseISO, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 import { CommentModal } from '../components/CommentModal';
 import {
   DndContext,
@@ -126,7 +127,7 @@ const SortableTaskRow: React.FC<SortableTaskRowProps> = ({ task, updateTaskStatu
 };
 
 export const ListView: React.FC = () => {
-  const { tasks, deleteTask, updateTaskStatus, updateTask } = useTasks();
+  const { tasks, deleteTask, updateTaskStatus, updateTask, dateRange, setDateRange } = useTasks();
   const [filter, setFilter] = useState('');
   const [orderedTasks, setOrderedTasks] = useState<Task[]>([]);
   const [commentingTask, setCommentingTask] = useState<Task | null>(null);
@@ -140,10 +141,20 @@ export const ListView: React.FC = () => {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  const filteredTasks = orderedTasks.filter(task => 
-    task.title.toLowerCase().includes(filter.toLowerCase()) ||
-    task.description.toLowerCase().includes(filter.toLowerCase())
-  );
+  const filteredTasks = orderedTasks.filter(task => {
+    const matchesFilter = task.title.toLowerCase().includes(filter.toLowerCase()) ||
+                          task.description.toLowerCase().includes(filter.toLowerCase());
+    
+    let matchesDate = true;
+    if (dateRange.startDate && dateRange.endDate) {
+      const taskDate = parseISO(task.due_date);
+      matchesDate = isWithinInterval(taskDate, { 
+        start: startOfDay(parseISO(dateRange.startDate)), 
+        end: endOfDay(parseISO(dateRange.endDate)) 
+      });
+    }
+    return matchesFilter && matchesDate;
+  });
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -164,13 +175,32 @@ export const ListView: React.FC = () => {
           <h1 className="text-2xl font-bold text-slate-900">Lista de Tarefas</h1>
           <p className="text-slate-500 text-sm">Gerencie suas tarefas em formato de lista</p>
         </div>
-        <input
-          type="text"
-          placeholder="Buscar tarefas..."
-          className="p-2.5 border border-slate-200 rounded-lg w-72 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm"
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-        />
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 bg-white p-1.5 rounded-lg border border-slate-200 shadow-sm">
+            <input 
+              type="date" 
+              className="p-1.5 border-none text-xs text-slate-600 focus:outline-none"
+              value={dateRange.startDate}
+              onChange={e => setDateRange({ ...dateRange, startDate: e.target.value })}
+              title="Data Inicial"
+            />
+            <span className="text-slate-300">-</span>
+            <input 
+              type="date" 
+              className="p-1.5 border-none text-xs text-slate-600 focus:outline-none"
+              value={dateRange.endDate}
+              onChange={e => setDateRange({ ...dateRange, endDate: e.target.value })}
+              title="Data Final"
+            />
+          </div>
+          <input
+            type="text"
+            placeholder="Buscar tarefas..."
+            className="p-2.5 border border-slate-200 rounded-lg w-72 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          />
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">

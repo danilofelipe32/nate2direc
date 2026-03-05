@@ -104,15 +104,11 @@ const DroppableCell: React.FC<{ date: Date; taskId: number; children?: React.Rea
 };
 
 export const TimelineView: React.FC = () => {
-  const { tasks, updateTask } = useTasks();
+  const { tasks, updateTask, dateRange, setDateRange } = useTasks();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [commentingTask, setCommentingTask] = useState<Task | null>(null);
-  
-  // Date Range Filter State
-  const [customStartDate, setCustomStartDate] = useState<string>('');
-  const [customEndDate, setCustomEndDate] = useState<string>('');
 
   // Sensors for drag and drop
   const sensors = useSensors(
@@ -127,26 +123,22 @@ export const TimelineView: React.FC = () => {
 
   // Calculate date range
   const startDate = useMemo(() => {
-    if (customStartDate) return parseISO(customStartDate);
+    if (dateRange.startDate) return parseISO(dateRange.startDate);
     return subDays(startOfWeek(currentDate, { weekStartsOn: 0 }), 3);
-  }, [currentDate, customStartDate]);
+  }, [currentDate, dateRange.startDate]);
 
   const endDate = useMemo(() => {
-    if (customEndDate) return parseISO(customEndDate);
+    if (dateRange.endDate) return parseISO(dateRange.endDate);
     // If custom start date is set but no end date, show 2 weeks from start
-    if (customStartDate && !customEndDate) return addDays(parseISO(customStartDate), 14);
+    if (dateRange.startDate && !dateRange.endDate) return addDays(parseISO(dateRange.startDate), 14);
     return addDays(endOfWeek(currentDate, { weekStartsOn: 0 }), 10);
-  }, [currentDate, customEndDate, customStartDate]);
+  }, [currentDate, dateRange.endDate, dateRange.startDate]);
   
   const days = useMemo(() => eachDayOfInterval({ start: startDate, end: endDate }), [startDate, endDate]);
 
   // Filter tasks based on the visible date range
   const filteredTasks = useMemo(() => {
-    // If no custom filter is applied, show all tasks (or maybe just tasks in the default view? 
-    // Usually Gantt shows all tasks on the left, but only renders bars for visible ones.
-    // However, the user request specifically asked to "filter displayed tasks".
-    
-    if (!customStartDate && !customEndDate) return tasks;
+    if (!dateRange.startDate && !dateRange.endDate) return tasks;
 
     return tasks.filter(task => {
       const taskDate = parseISO(task.due_date);
@@ -156,7 +148,7 @@ export const TimelineView: React.FC = () => {
         end: endOfDay(endDate) 
       });
     });
-  }, [tasks, startDate, endDate, customStartDate, customEndDate]);
+  }, [tasks, startDate, endDate, dateRange.startDate, dateRange.endDate]);
 
   const handleDragStart = (event: DragStartEvent) => {
     if (event.active.data.current?.task) {
@@ -197,8 +189,7 @@ export const TimelineView: React.FC = () => {
   const navigateNext = () => setCurrentDate(addDays(currentDate, 7));
 
   const clearFilters = () => {
-    setCustomStartDate('');
-    setCustomEndDate('');
+    setDateRange({ startDate: '', endDate: '' });
     setCurrentDate(new Date());
   };
 
@@ -220,19 +211,19 @@ export const TimelineView: React.FC = () => {
             <input 
               type="date" 
               className="p-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 focus:outline-none focus:border-indigo-500"
-              value={customStartDate}
-              onChange={e => setCustomStartDate(e.target.value)}
+              value={dateRange.startDate}
+              onChange={e => setDateRange({ ...dateRange, startDate: e.target.value })}
               title="Data Inicial"
             />
             <span className="text-slate-300">-</span>
             <input 
               type="date" 
               className="p-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 focus:outline-none focus:border-indigo-500"
-              value={customEndDate}
-              onChange={e => setCustomEndDate(e.target.value)}
+              value={dateRange.endDate}
+              onChange={e => setDateRange({ ...dateRange, endDate: e.target.value })}
               title="Data Final"
             />
-            {(customStartDate || customEndDate) && (
+            {(dateRange.startDate || dateRange.endDate) && (
               <button 
                 onClick={clearFilters}
                 className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
@@ -244,7 +235,7 @@ export const TimelineView: React.FC = () => {
           </div>
 
           {/* Navigation Controls - Only show if not filtering */}
-          {(!customStartDate && !customEndDate) && (
+          {(!dateRange.startDate && !dateRange.endDate) && (
             <div className="flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
               <button onClick={navigatePrev} className="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors">
                 <ChevronLeft size={20} />
