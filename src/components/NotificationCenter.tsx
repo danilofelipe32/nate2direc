@@ -25,7 +25,10 @@ export const NotificationCenter: React.FC = () => {
     tasks.forEach(task => {
       const dueDate = new Date(task.due_date);
       const isOverdue = dueDate < today && task.status !== 'done';
-      const isDueToday = dueDate.toDateString() === today.toDateString() && task.status !== 'done';
+      
+      const tomorrow = new Date(today);
+      tomorrow.setHours(today.getHours() + 24);
+      const isNearing = dueDate >= today && dueDate <= tomorrow && task.status !== 'done';
       
       if (isOverdue) {
         newNotifications.push({
@@ -36,11 +39,11 @@ export const NotificationCenter: React.FC = () => {
           timestamp: dueDate,
           read: false
         });
-      } else if (isDueToday) {
+      } else if (isNearing) {
         newNotifications.push({
-          id: `due-today-${task.id}`,
-          title: 'Vence Hoje',
-          message: `"${task.title}" vence hoje.`,
+          id: `nearing-${task.id}`,
+          title: 'Próxima do Vencimento',
+          message: `"${task.title}" vence em breve.`,
           type: 'warning',
           timestamp: dueDate,
           read: false
