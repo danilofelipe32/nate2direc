@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Calendar, GripVertical, Bell, Flag, Repeat } from 'lucide-react';
+import { Plus, Trash2, Calendar, GripVertical, Flag, Repeat } from 'lucide-react';
 import {
   DndContext,
   closestCorners,
@@ -14,7 +14,6 @@ import {
   DragEndEvent,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
@@ -41,21 +40,6 @@ const PRIORITY_LABELS = {
   medium: 'Média',
   high: 'Alta',
 };
-
-function urlBase64ToUint8Array(base64String: string) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding)
-    .replace(/\-/g, '+')
-    .replace(/_/g, '/');
-
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-}
 
 const TaskCard: React.FC<{ task: Task; onDelete: (id: number) => void; onClick: (task: Task) => void }> = ({ task, onDelete, onClick }) => {
   const {
@@ -175,72 +159,17 @@ const Column: React.FC<{ id: string; title: string; tasks: Task[]; onDelete: (id
 };
 
 export const KanbanBoard: React.FC = () => {
-  const { tasks, addTask, deleteTask, updateTaskStatus, updateTask, refreshTasks } = useTasks();
+  const { tasks, addTask, deleteTask, updateTaskStatus, updateTask } = useTasks();
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newPriority, setNewPriority] = useState<'low' | 'medium' | 'high'>('medium');
   const [filterPriority, setFilterPriority] = useState<'all' | 'low' | 'medium' | 'high'>('all');
-  const [isSubscribed, setIsSubscribed] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
-
-  // Check subscription status
-  React.useEffect(() => {
-    if ('serviceWorker' in navigator && 'PushManager' in window) {
-      navigator.serviceWorker.ready.then(registration => {
-        registration.pushManager.getSubscription().then(subscription => {
-          setIsSubscribed(!!subscription);
-        });
-      });
-    }
-  }, []);
-
-  const subscribeToPush = async () => {
-    if (!('serviceWorker' in navigator)) return;
-
-    if (Notification.permission === 'denied') {
-      alert('As notificações estão bloqueadas. Por favor, habilite-as nas configurações do navegador (ícone de cadeado na barra de endereço) para receber alertas.');
-      return;
-    }
-
-    try {
-      if (Notification.permission === 'default') {
-        const permission = await Notification.requestPermission();
-        if (permission !== 'granted') {
-          alert('Permissão para notificações foi negada.');
-          return;
-        }
-      }
-
-      const registration = await navigator.serviceWorker.ready;
-      const response = await fetch('/api/vapid-public-key');
-      const { publicKey } = await response.json();
-
-      const convertedVapidKey = urlBase64ToUint8Array(publicKey);
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: convertedVapidKey
-      });
-
-      await fetch('/api/subscribe', {
-        method: 'POST',
-        body: JSON.stringify(subscription),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      setIsSubscribed(true);
-      alert('Notificações ativadas com sucesso!');
-    } catch (error) {
-      console.error('Failed to subscribe:', error);
-      alert('Erro ao ativar notificações. Se o problema persistir, verifique as permissões do site.');
-    }
-  };
 
   const handleAddTask = async () => {
     if (!newTaskTitle.trim()) return;
@@ -306,12 +235,6 @@ export const KanbanBoard: React.FC = () => {
           <p className="text-zinc-500">Gerencie suas tarefas visualmente</p>
         </div>
         <div className="flex gap-2 items-center flex-wrap">
-          {!isSubscribed && (
-            <button onClick={subscribeToPush} className="bg-blue-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-blue-700 transition-colors mr-2">
-              <Bell size={20} /> Ativar Notificações
-            </button>
-          )}
-          
           <div className="flex items-center gap-2 mr-4">
             <span className="text-sm text-zinc-500">Filtrar:</span>
             <select

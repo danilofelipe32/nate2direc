@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, List, Calendar, Kanban, CheckSquare } from 'lucide-react';
+import { NotificationCenter } from './NotificationCenter';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
@@ -61,8 +62,13 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto bg-slate-50">
-        <div className="p-8 max-w-7xl mx-auto">
+      <main className="flex-1 overflow-auto bg-slate-50 flex flex-col">
+        {/* Top Header with Notification Center */}
+        <header className="bg-white border-b border-slate-200 px-8 py-4 flex justify-end items-center sticky top-0 z-20 shadow-sm">
+          <NotificationCenter />
+        </header>
+        
+        <div className="p-8 max-w-7xl mx-auto flex-1 w-full">
           {children}
         </div>
       </main>

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useTasks, Task } from '../context/TaskContext';
+import { EditTaskModal } from '../components/EditTaskModal';
 import { 
   format, 
   addDays, 
@@ -10,7 +11,10 @@ import {
   isToday, 
   parseISO, 
   subDays,
-  isPast
+  isPast,
+  isWithinInterval,
+  startOfDay,
+  endOfDay
 } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
@@ -26,11 +30,11 @@ import {
   TouchSensor,
   MouseSensor,
 } from '@dnd-kit/core';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, GripVertical } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, GripVertical, Filter, X } from 'lucide-react';
 
 // --- Components ---
 
-const DraggableTaskBar: React.FC<{ task: Task }> = ({ task }) => {
+const DraggableTaskBar: React.FC<{ task: Task; onClick: (task: Task) => void }> = ({ task, onClick }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `task-${task.id}`,
     data: { task },
@@ -65,7 +69,8 @@ const DraggableTaskBar: React.FC<{ task: Task }> = ({ task }) => {
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className={`h-8 rounded-md shadow-sm border ${getTaskColor(task)} cursor-grab active:cursor-grabbing flex items-center justify-between px-2 relative group hover:brightness-110 transition-all`}
+      onClick={() => onClick(task)}
+      className={`h-8 rounded-md shadow-sm border ${getTaskColor(task)} cursor-pointer active:cursor-grabbing flex items-center justify-between px-2 relative group hover:brightness-110 transition-all`}
       title={task.title}
     >
       <span className="text-[10px] font-bold text-white truncate w-full">{task.title}</span>
@@ -101,6 +106,11 @@ export const TimelineView: React.FC = () => {
   const { tasks, updateTask } = useTasks();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  
+  // Date Range Filter State
+  const [customStartDate, setCustomStartDate] = useState<string>('');
+  const [customEndDate, setCustomEndDate] = useState<string>('');
 
   // Sensors for drag and drop
   const sensors = useSensors(
@@ -113,11 +123,38 @@ export const TimelineView: React.FC = () => {
     useSensor(TouchSensor)
   );
 
-  // Calculate date range (2 weeks window centered on current date or start of week)
-  const startDate = useMemo(() => subDays(startOfWeek(currentDate, { weekStartsOn: 0 }), 3), [currentDate]);
-  const endDate = useMemo(() => addDays(endOfWeek(currentDate, { weekStartsOn: 0 }), 10), [currentDate]);
+  // Calculate date range
+  const startDate = useMemo(() => {
+    if (customStartDate) return parseISO(customStartDate);
+    return subDays(startOfWeek(currentDate, { weekStartsOn: 0 }), 3);
+  }, [currentDate, customStartDate]);
+
+  const endDate = useMemo(() => {
+    if (customEndDate) return parseISO(customEndDate);
+    // If custom start date is set but no end date, show 2 weeks from start
+    if (customStartDate && !customEndDate) return addDays(parseISO(customStartDate), 14);
+    return addDays(endOfWeek(currentDate, { weekStartsOn: 0 }), 10);
+  }, [currentDate, customEndDate, customStartDate]);
   
   const days = useMemo(() => eachDayOfInterval({ start: startDate, end: endDate }), [startDate, endDate]);
+
+  // Filter tasks based on the visible date range
+  const filteredTasks = useMemo(() => {
+    // If no custom filter is applied, show all tasks (or maybe just tasks in the default view? 
+    // Usually Gantt shows all tasks on the left, but only renders bars for visible ones.
+    // However, the user request specifically asked to "filter displayed tasks".
+    
+    if (!customStartDate && !customEndDate) return tasks;
+
+    return tasks.filter(task => {
+      const taskDate = parseISO(task.due_date);
+      // Check if task date is within the visible range
+      return isWithinInterval(taskDate, { 
+        start: startOfDay(startDate), 
+        end: endOfDay(endDate) 
+      });
+    });
+  }, [tasks, startDate, endDate, customStartDate, customEndDate]);
 
   const handleDragStart = (event: DragStartEvent) => {
     if (event.active.data.current?.task) {
@@ -148,29 +185,77 @@ export const TimelineView: React.FC = () => {
     }
   };
 
-  const navigateToday = () => setCurrentDate(new Date());
+  const navigateToday = () => {
+    setCurrentDate(new Date());
+    setCustomStartDate('');
+    setCustomEndDate('');
+  };
+  
   const navigatePrev = () => setCurrentDate(subDays(currentDate, 7));
   const navigateNext = () => setCurrentDate(addDays(currentDate, 7));
 
+  const clearFilters = () => {
+    setCustomStartDate('');
+    setCustomEndDate('');
+    setCurrentDate(new Date());
+  };
+
   return (
     <div className="h-full flex flex-col space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Cronograma Gantt</h1>
-          <p className="text-slate-500 text-sm">Arraste as tarefas para reagendar</p>
+          <p className="text-slate-500 text-sm">Arraste as tarefas para reagendar ou clique para editar</p>
         </div>
         
-        <div className="flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
-          <button onClick={navigatePrev} className="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors">
-            <ChevronLeft size={20} />
-          </button>
-          <button onClick={navigateToday} className="px-4 py-2 font-medium text-sm text-slate-700 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-2">
-            <CalendarIcon size={16} />
-            Hoje
-          </button>
-          <button onClick={navigateNext} className="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors">
-            <ChevronRight size={20} />
-          </button>
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Date Range Filter Inputs */}
+          <div className="flex items-center gap-2 bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm">
+            <div className="flex items-center gap-2 px-2 border-r border-slate-100">
+              <Filter size={14} className="text-slate-400" />
+              <span className="text-xs font-medium text-slate-500">Filtrar:</span>
+            </div>
+            <input 
+              type="date" 
+              className="p-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 focus:outline-none focus:border-indigo-500"
+              value={customStartDate}
+              onChange={e => setCustomStartDate(e.target.value)}
+              title="Data Inicial"
+            />
+            <span className="text-slate-300">-</span>
+            <input 
+              type="date" 
+              className="p-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 focus:outline-none focus:border-indigo-500"
+              value={customEndDate}
+              onChange={e => setCustomEndDate(e.target.value)}
+              title="Data Final"
+            />
+            {(customStartDate || customEndDate) && (
+              <button 
+                onClick={clearFilters}
+                className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                title="Limpar filtros"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+
+          {/* Navigation Controls - Only show if not filtering */}
+          {(!customStartDate && !customEndDate) && (
+            <div className="flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+              <button onClick={navigatePrev} className="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors">
+                <ChevronLeft size={20} />
+              </button>
+              <button onClick={navigateToday} className="px-4 py-2 font-medium text-sm text-slate-700 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-2">
+                <CalendarIcon size={16} />
+                Hoje
+              </button>
+              <button onClick={navigateNext} className="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors">
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -204,7 +289,7 @@ export const TimelineView: React.FC = () => {
 
           {/* Body */}
           <div className="overflow-auto flex-1">
-            {tasks.map(task => (
+            {filteredTasks.map(task => (
               <div key={task.id} className="flex hover:bg-slate-50/50 transition-colors">
                 {/* Task Name Column */}
                 <div className="w-64 flex-shrink-0 p-3 border-r border-slate-200 border-b border-slate-100 flex items-center gap-2 bg-white sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
@@ -213,7 +298,11 @@ export const TimelineView: React.FC = () => {
                     task.priority === 'medium' ? 'bg-amber-500' : 
                     'bg-emerald-500'
                   }`} />
-                  <div className="truncate text-sm font-medium text-slate-700" title={task.title}>
+                  <div 
+                    className="truncate text-sm font-medium text-slate-700 cursor-pointer hover:text-indigo-600 transition-colors" 
+                    title={task.title}
+                    onClick={() => setEditingTask(task)}
+                  >
                     {task.title}
                   </div>
                 </div>
@@ -224,7 +313,7 @@ export const TimelineView: React.FC = () => {
                     const isTaskDate = isSameDay(parseISO(task.due_date), day);
                     return (
                       <DroppableCell key={day.toISOString()} date={day} taskId={task.id}>
-                        {isTaskDate && <DraggableTaskBar task={task} />}
+                        {isTaskDate && <DraggableTaskBar task={task} onClick={setEditingTask} />}
                       </DroppableCell>
                     );
                   })}
@@ -232,9 +321,9 @@ export const TimelineView: React.FC = () => {
               </div>
             ))}
             
-            {tasks.length === 0 && (
+            {filteredTasks.length === 0 && (
               <div className="p-12 text-center text-slate-400 italic">
-                Nenhuma tarefa para exibir.
+                {tasks.length === 0 ? "Nenhuma tarefa criada." : "Nenhuma tarefa encontrada neste intervalo."}
               </div>
             )}
           </div>
@@ -248,6 +337,14 @@ export const TimelineView: React.FC = () => {
           ) : null}
         </DragOverlay>
       </DndContext>
+
+      {editingTask && (
+        <EditTaskModal
+          task={editingTask}
+          onClose={() => setEditingTask(null)}
+          onSave={updateTask}
+        />
+      )}
     </div>
   );
 };
