@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Calendar, GripVertical, Flag, Repeat } from 'lucide-react';
+import { Plus, Trash2, Calendar, GripVertical, Flag, Repeat, MessageSquare } from 'lucide-react';
 import {
   DndContext,
   closestCorners,
@@ -22,6 +22,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { useTasks, Task } from '../context/TaskContext';
 import { EditTaskModal } from '../components/EditTaskModal';
+import { CommentModal } from '../components/CommentModal';
 
 const COLUMNS = [
   { id: 'todo', title: 'A Fazer' },
@@ -41,7 +42,7 @@ const PRIORITY_LABELS = {
   high: 'Alta',
 };
 
-const TaskCard: React.FC<{ task: Task; onDelete: (id: number) => void; onClick: (task: Task) => void }> = ({ task, onDelete, onClick }) => {
+const TaskCard: React.FC<{ task: Task; onDelete: (id: number) => void; onClick: (task: Task) => void; onComment: (task: Task) => void }> = ({ task, onDelete, onClick, onComment }) => {
   const {
     attributes,
     listeners,
@@ -90,12 +91,23 @@ const TaskCard: React.FC<{ task: Task; onDelete: (id: number) => void; onClick: 
             <GripVertical size={16} />
           </div>
         </div>
-        <button 
-          onClick={(e) => { e.stopPropagation(); onDelete(task.id); }} 
-          className="text-slate-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
-        >
-          <Trash2 size={16} />
-        </button>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={(e) => { e.stopPropagation(); onComment(task); }} 
+            className="text-slate-300 hover:text-indigo-500 transition-colors opacity-0 group-hover:opacity-100 flex items-center gap-1"
+          >
+            <MessageSquare size={16} />
+            {task.comments && task.comments.length > 0 && (
+              <span className="text-[10px] font-bold">{task.comments.length}</span>
+            )}
+          </button>
+          <button 
+            onClick={(e) => { e.stopPropagation(); onDelete(task.id); }} 
+            className="text-slate-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
       </div>
       <div className="flex items-center gap-2 mb-2">
         <h3 className="font-semibold text-slate-800 text-sm leading-tight truncate flex-1">{task.title}</h3>
@@ -105,6 +117,11 @@ const TaskCard: React.FC<{ task: Task; onDelete: (id: number) => void; onClick: 
           </div>
         )}
       </div>
+      {task.comments && task.comments.length > 0 && (
+        <p className="text-[10px] text-slate-400 truncate mb-2">
+          {task.comments[task.comments.length - 1].text}
+        </p>
+      )}
       <div className="flex items-center justify-between mt-3">
         <p className="text-xs text-slate-500 flex items-center gap-1">
           <Calendar size={12} /> {new Date(task.due_date).toLocaleDateString('pt-BR')}
@@ -118,7 +135,7 @@ const TaskCard: React.FC<{ task: Task; onDelete: (id: number) => void; onClick: 
   );
 };
 
-const Column: React.FC<{ id: string; title: string; tasks: Task[]; onDelete: (id: number) => void; onTaskClick: (task: Task) => void }> = ({ id, title, tasks, onDelete, onTaskClick }) => {
+const Column: React.FC<{ id: string; title: string; tasks: Task[]; onDelete: (id: number) => void; onTaskClick: (task: Task) => void; onCommentClick: (task: Task) => void }> = ({ id, title, tasks, onDelete, onTaskClick, onCommentClick }) => {
   const { setNodeRef } = useSortable({ id: id, data: { type: 'Column', id } });
 
   const getColumnColor = (id: string) => {
@@ -150,7 +167,7 @@ const Column: React.FC<{ id: string; title: string; tasks: Task[]; onDelete: (id
       <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
         <div className="flex flex-col gap-3 flex-1">
           {tasks.map(task => (
-            <TaskCard key={task.id} task={task} onDelete={onDelete} onClick={onTaskClick} />
+            <TaskCard key={task.id} task={task} onDelete={onDelete} onClick={onTaskClick} onComment={onCommentClick} />
           ))}
         </div>
       </SortableContext>
@@ -162,6 +179,7 @@ export const KanbanBoard: React.FC = () => {
   const { tasks, deleteTask, updateTaskStatus, updateTask } = useTasks();
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [commentingTask, setCommentingTask] = useState<Task | null>(null);
   const [filterPriority, setFilterPriority] = useState<'all' | 'low' | 'medium' | 'high'>('all');
 
   const sensors = useSensors(
@@ -262,11 +280,12 @@ export const KanbanBoard: React.FC = () => {
               tasks={tasks.filter((t) => (t.status === col.id) && (filterPriority === 'all' || t.priority === filterPriority))}
               onDelete={deleteTask}
               onTaskClick={setEditingTask}
+              onCommentClick={setCommentingTask}
             />
           ))}
         </div>
         <DragOverlay dropAnimation={dropAnimation}>
-          {activeTask ? <TaskCard task={activeTask} onDelete={() => {}} onClick={() => {}} /> : null}
+          {activeTask ? <TaskCard task={activeTask} onDelete={() => {}} onClick={() => {}} onComment={() => {}} /> : null}
         </DragOverlay>
       </DndContext>
 
@@ -275,6 +294,12 @@ export const KanbanBoard: React.FC = () => {
           task={editingTask}
           onClose={() => setEditingTask(null)}
           onSave={updateTask}
+        />
+      )}
+      {commentingTask && (
+        <CommentModal
+          task={commentingTask}
+          onClose={() => setCommentingTask(null)}
         />
       )}
     </div>
