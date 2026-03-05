@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { X, Calendar, Flag, CheckCircle, Type, AlignLeft, Repeat } from 'lucide-react';
-import { Task } from '../context/TaskContext';
+import { X, Calendar, Flag, CheckCircle, Type, AlignLeft, Repeat, MessageSquare, Send } from 'lucide-react';
+import { Task, useTasks } from '../context/TaskContext';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface EditTaskModalProps {
   task: Task;
@@ -9,12 +11,14 @@ interface EditTaskModalProps {
 }
 
 export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, onClose, onSave }) => {
+  const { addComment } = useTasks();
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || '');
   const [dueDate, setDueDate] = useState(task.due_date ? new Date(task.due_date).toISOString().split('T')[0] : '');
   const [priority, setPriority] = useState(task.priority);
   const [status, setStatus] = useState(task.status);
   const [recurring, setRecurring] = useState(task.recurring || 'none');
+  const [newComment, setNewComment] = useState('');
 
   const handleSave = () => {
     onSave({
@@ -29,9 +33,15 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, onClose, onS
     onClose();
   };
 
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return;
+    await addComment(task.id, newComment);
+    setNewComment('');
+  };
+
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all duration-300">
-      <div className="bg-white rounded-2xl p-0 w-full max-w-lg shadow-2xl border border-slate-200 overflow-hidden transform transition-all scale-100 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl p-0 w-full max-w-lg shadow-2xl border border-slate-200 overflow-hidden transform transition-all scale-100 max-h-[90vh] flex flex-col">
         <div className="flex justify-between items-center p-6 border-b border-slate-100 bg-slate-50/50 sticky top-0 z-10">
           <div>
             <h2 className="text-xl font-bold text-slate-800">Editar Tarefa</h2>
@@ -45,7 +55,7 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, onClose, onS
           </button>
         </div>
         
-        <div className="p-6 space-y-5">
+        <div className="flex-1 overflow-y-auto p-6 space-y-5 custom-scrollbar">
           <div>
             <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <Type size={14} /> Título
@@ -145,6 +155,51 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, onClose, onS
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Comments Section */}
+          <div className="pt-4 border-t border-slate-100">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <MessageSquare size={14} /> Comentários ({task.comments?.length || 0})
+            </label>
+            
+            <div className="space-y-3 mb-4 max-h-[200px] overflow-y-auto custom-scrollbar pr-1">
+              {task.comments && task.comments.length > 0 ? (
+                task.comments.map((comment) => (
+                  <div key={comment.id} className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <div className="flex justify-between items-start mb-1">
+                      <span className="text-xs font-bold text-slate-700">{comment.author}</span>
+                      <span className="text-[10px] text-slate-400">
+                        {format(new Date(comment.createdAt), "d MMM, HH:mm", { locale: ptBR })}
+                      </span>
+                    </div>
+                    <p className="text-sm text-slate-600">{comment.text}</p>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-4 text-slate-400 text-sm italic bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                  Nenhum comentário ainda.
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
+                placeholder="Escreva um comentário..."
+                className="flex-1 p-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+              />
+              <button
+                onClick={handleAddComment}
+                disabled={!newComment.trim()}
+                className="p-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <Send size={18} />
+              </button>
             </div>
           </div>
         </div>

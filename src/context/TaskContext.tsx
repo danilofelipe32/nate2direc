@@ -1,5 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+export interface Comment {
+  id: string;
+  text: string;
+  createdAt: string;
+  author: string;
+}
+
 export interface Task {
   id: number;
   title: string;
@@ -8,6 +15,7 @@ export interface Task {
   status: 'todo' | 'in-progress' | 'done';
   priority: 'low' | 'medium' | 'high';
   recurring?: 'none' | 'daily' | 'weekly' | 'monthly';
+  comments?: Comment[];
 }
 
 interface TaskContextType {
@@ -16,6 +24,7 @@ interface TaskContextType {
   updateTask: (updatedTask: Task) => Promise<void>;
   deleteTask: (id: number) => Promise<void>;
   updateTaskStatus: (id: number, status: string) => Promise<void>;
+  addComment: (taskId: number, text: string) => Promise<void>;
   refreshTasks: () => void;
 }
 
@@ -32,7 +41,8 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ...t,
           status: ['todo', 'in-progress', 'done'].includes(t.status) ? t.status : 'todo',
           priority: ['low', 'medium', 'high'].includes(t.priority) ? t.priority : 'medium',
-          recurring: ['none', 'daily', 'weekly', 'monthly'].includes(t.recurring) ? t.recurring : 'none'
+          recurring: ['none', 'daily', 'weekly', 'monthly'].includes(t.recurring) ? t.recurring : 'none',
+          comments: Array.isArray(t.comments) ? t.comments : []
         }));
         setTasks(validTasks);
       });
@@ -50,11 +60,11 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description: '', due_date: date, priority, recurring })
+        body: JSON.stringify({ title, description: '', due_date: date, priority, recurring, comments: [] })
       });
       if (!res.ok) throw new Error('Failed to add task');
       const newTask = await res.json();
-      setTasks([...tasks, { id: newTask.id, title, description: '', due_date: date, status: 'todo', priority, recurring }]);
+      setTasks([...tasks, { id: newTask.id, title, description: '', due_date: date, status: 'todo', priority, recurring, comments: [] }]);
     } catch (error) {
       console.error("Error adding task:", error);
       alert("Falha ao adicionar tarefa.");
@@ -72,7 +82,8 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
           due_date: updatedTask.due_date,
           status: updatedTask.status,
           priority: updatedTask.priority,
-          recurring: updatedTask.recurring
+          recurring: updatedTask.recurring,
+          comments: updatedTask.comments
         })
       });
       setTasks(tasks.map(t => t.id === updatedTask.id ? updatedTask : t));
@@ -105,8 +116,25 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const addComment = async (taskId: number, text: string) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    const newComment: Comment = {
+      id: Date.now().toString(),
+      text,
+      createdAt: new Date().toISOString(),
+      author: 'Você' // In a real app, this would be the logged-in user
+    };
+
+    const updatedComments = [...(task.comments || []), newComment];
+    const updatedTask = { ...task, comments: updatedComments };
+
+    await updateTask(updatedTask);
+  };
+
   return (
-    <TaskContext.Provider value={{ tasks, addTask, updateTask, deleteTask, updateTaskStatus, refreshTasks }}>
+    <TaskContext.Provider value={{ tasks, addTask, updateTask, deleteTask, updateTaskStatus, addComment, refreshTasks }}>
       {children}
     </TaskContext.Provider>
   );
