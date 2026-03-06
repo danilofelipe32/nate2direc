@@ -67,7 +67,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       {/* Main Content */}
       <main className="flex-1 overflow-auto bg-slate-50 dark:bg-slate-950 flex flex-col relative">
         {/* Top Header with Notification Center */}
-        <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-8 py-4 flex justify-end items-center gap-4 sticky top-0 z-20 shadow-sm">
+        <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-8 py-4 flex justify-end items-center gap-4 sticky top-0 z-20 shadow-sm">
           <ThemeToggle />
           <NotificationCenter />
         </header>
