@@ -32,9 +32,9 @@ const COLUMNS = [
 ];
 
 const PRIORITY_COLORS = {
-  low: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  medium: 'bg-amber-50 text-amber-700 border-amber-200',
-  high: 'bg-rose-50 text-rose-700 border-rose-200',
+  low: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20',
+  medium: 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20',
+  high: 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/20',
 };
 
 const PRIORITY_LABELS = {
@@ -63,7 +63,7 @@ const TaskCard: React.FC<{ task: Task; onDelete: (id: number) => void; onClick: 
       <div
         ref={setNodeRef}
         style={style}
-        className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-xl border-2 border-indigo-500 opacity-50 h-[100px] rotate-2"
+        className="bg-white dark:bg-[#1a1a1a] p-4 rounded-xl shadow-2xl border border-indigo-500/50 opacity-80 h-[100px] rotate-2 scale-105"
       />
     );
   }
@@ -73,73 +73,70 @@ const TaskCard: React.FC<{ task: Task; onDelete: (id: number) => void; onClick: 
       ref={setNodeRef}
       style={style}
       onClick={() => onClick(task)}
-      className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 group hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-md transition-all duration-200 cursor-pointer relative overflow-hidden pl-5"
+      className="bg-white dark:bg-[#1a1a1a] p-4 rounded-xl shadow-sm border border-slate-200 dark:border-white/10 group hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-md transition-all duration-200 cursor-pointer relative overflow-hidden pl-4"
     >
-      <div className={`absolute left-0 top-0 bottom-0 w-2 ${
+      <div className={`absolute left-0 top-0 bottom-0 w-1 ${
         task.priority === 'high' ? 'bg-rose-500' : 
         task.priority === 'medium' ? 'bg-amber-500' : 
         'bg-emerald-500'
       }`} />
       
-      <div className="flex justify-between items-start mb-2">
+      <div className="flex justify-between items-start mb-3">
         <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${
-              task.priority === 'high' ? 'bg-rose-500 animate-pulse' : 
-              task.priority === 'medium' ? 'bg-amber-500' : 
-              'bg-emerald-500'
-          }`} />
-          <div {...attributes} {...listeners} className="cursor-grab text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400" onClick={(e) => e.stopPropagation()}>
+          <div {...attributes} {...listeners} className="cursor-grab text-slate-300 dark:text-slate-600 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" onClick={(e) => e.stopPropagation()}>
             <GripVertical size={16} />
           </div>
+          <h3 className="font-semibold text-slate-800 dark:text-slate-100 text-sm leading-tight truncate">{task.title}</h3>
         </div>
         <div className="flex items-center gap-2">
           <button 
             onClick={(e) => { e.stopPropagation(); onComment(task); }} 
-            className="text-slate-300 dark:text-slate-600 hover:text-indigo-500 transition-colors opacity-0 group-hover:opacity-100 flex items-center gap-1"
+            className="text-slate-400 dark:text-slate-500 hover:text-indigo-500 transition-colors opacity-0 group-hover:opacity-100 flex items-center gap-1"
           >
-            <MessageSquare size={16} />
+            <MessageSquare size={14} />
             {task.comments && task.comments.length > 0 && (
-              <span className="text-[10px] font-bold">{task.comments.length}</span>
+              <span className="text-[10px] font-bold font-mono">{task.comments.length}</span>
             )}
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); onDelete(task.id); }} 
-            className="text-slate-300 dark:text-slate-600 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
+            className="text-slate-400 dark:text-slate-500 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
           >
-            <Trash2 size={16} />
+            <Trash2 size={14} />
           </button>
         </div>
       </div>
-      <div className="flex items-center gap-2 mb-2">
-        <h3 className="font-semibold text-slate-800 dark:text-slate-100 text-sm leading-tight truncate flex-1">{task.title}</h3>
-        {task.recurring && task.recurring !== 'none' && (
-          <div className="text-indigo-500 dark:text-indigo-400" title={`Recorrência: ${task.recurring}`}>
-            <Repeat size={14} />
-          </div>
-        )}
-      </div>
+      
       {task.comments && task.comments.length > 0 && (
-        <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate mb-2">
-          {task.comments[task.comments.length - 1].text}
+        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mb-3 italic">
+          "{task.comments[task.comments.length - 1].text}"
         </p>
       )}
-      <div className="flex items-center justify-between mt-3">
-        <div className="text-xs text-slate-500 dark:text-slate-400 flex flex-col gap-0.5">
+      
+      <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-100 dark:border-white/5">
+        <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 flex flex-col gap-1">
           {task.startDate && (
-            <p className="flex items-center gap-1">
-              <Calendar size={10} /> Início: {new Date(task.startDate).toLocaleDateString('pt-BR')}
+            <p className="flex items-center gap-1.5">
+              <Calendar size={10} /> {new Date(task.startDate).toLocaleDateString('pt-BR')}
             </p>
           )}
           {task.endDate && (
-            <p className="flex items-center gap-1">
-              <Calendar size={10} /> Fim: {new Date(task.endDate).toLocaleDateString('pt-BR')}
+            <p className="flex items-center gap-1.5">
+              <Calendar size={10} /> {new Date(task.endDate).toLocaleDateString('pt-BR')}
             </p>
           )}
         </div>
-        <span className={`text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-wide border flex items-center gap-1 ${PRIORITY_COLORS[task.priority || 'medium']}`}>
-          <Flag size={10} className="fill-current" />
-          {PRIORITY_LABELS[task.priority || 'medium']}
-        </span>
+        <div className="flex items-center gap-2">
+          {task.recurring && task.recurring !== 'none' && (
+            <div className="text-indigo-500 dark:text-indigo-400" title={`Recorrência: ${task.recurring}`}>
+              <Repeat size={12} />
+            </div>
+          )}
+          <span className={`text-[9px] px-2 py-0.5 rounded font-bold uppercase tracking-wider border flex items-center gap-1 ${PRIORITY_COLORS[task.priority || 'medium']}`}>
+            <Flag size={8} className="fill-current" />
+            {PRIORITY_LABELS[task.priority || 'medium']}
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -148,30 +145,14 @@ const TaskCard: React.FC<{ task: Task; onDelete: (id: number) => void; onClick: 
 const Column: React.FC<{ id: string; title: string; tasks: Task[]; onDelete: (id: number) => void; onTaskClick: (task: Task) => void; onCommentClick: (task: Task) => void }> = ({ id, title, tasks, onDelete, onTaskClick, onCommentClick }) => {
   const { setNodeRef } = useSortable({ id: id, data: { type: 'Column', id } });
 
-  const getColumnColor = (id: string) => {
-    switch(id) {
-      case 'todo': return 'bg-slate-100 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800';
-      case 'in-progress': return 'bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-900/30';
-      case 'done': return 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-900/30';
-      default: return 'bg-slate-100 dark:bg-slate-900/50';
-    }
-  };
-
-  const getHeaderColor = (id: string) => {
-    switch(id) {
-      case 'todo': return 'text-slate-700 dark:text-slate-300';
-      case 'in-progress': return 'text-blue-700 dark:text-blue-400';
-      case 'done': return 'text-emerald-700 dark:text-emerald-400';
-      default: return 'text-slate-700 dark:text-slate-300';
-    }
-  };
-
   return (
-    <div ref={setNodeRef} className={`p-4 rounded-2xl flex flex-col gap-4 min-h-[500px] border ${getColumnColor(id)}`}>
-      <div className="flex items-center justify-between mb-2">
-        <h2 className={`font-bold flex items-center gap-2 ${getHeaderColor(id)}`}>
+    <div ref={setNodeRef} className="bg-slate-100/50 dark:bg-[#111111] p-4 rounded-2xl flex flex-col gap-4 min-h-[500px] border border-slate-200/50 dark:border-white/5">
+      <div className="flex items-center justify-between mb-2 px-1">
+        <h2 className="font-semibold text-sm uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
           {title}
-          <span className="bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs px-2 py-1 rounded-full shadow-sm border border-slate-100 dark:border-slate-700 font-mono">{tasks.length}</span>
+          <span className="bg-white dark:bg-white/10 text-slate-600 dark:text-slate-300 text-[10px] px-2 py-0.5 rounded-full shadow-sm border border-slate-200 dark:border-white/5 font-mono">
+            {tasks.length}
+          </span>
         </h2>
       </div>
       <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
@@ -218,9 +199,7 @@ export const KanbanBoard: React.FC = () => {
   };
 
   const onDragOver = (event: DragOverEvent) => {
-    // This is purely visual in dnd-kit for sortable lists usually, 
-    // but we can implement optimistic updates here if we want.
-    // For simplicity, we'll rely on onDragEnd to commit changes.
+    // Visual only
   };
 
   const onDragEnd = (event: DragEndEvent) => {
@@ -254,54 +233,53 @@ export const KanbanBoard: React.FC = () => {
     sideEffects: defaultDropAnimationSideEffects({
       styles: {
         active: {
-          opacity: '0.5',
+          opacity: '0.4',
         },
       },
     }),
   };
 
   return (
-    <div>
-      <header className="mb-8 flex justify-between items-center flex-wrap gap-4">
+    <div className="pb-10">
+      <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Quadro Kanban</h1>
-          <p className="text-zinc-500 dark:text-zinc-400">Gerencie suas tarefas visualmente</p>
+          <h1 className="text-3xl font-semibold text-slate-900 dark:text-white tracking-tight">Quadro Kanban</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Gerencie suas tarefas visualmente</p>
         </div>
-        <div className="flex gap-2 items-center flex-wrap">
-          <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="flex gap-3 items-center flex-wrap">
+          <div className="flex items-center gap-2 bg-white dark:bg-[#111111] px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm">
             <input 
               type="date" 
-              className="p-1.5 border-none text-xs text-slate-600 dark:text-slate-300 focus:outline-none bg-transparent"
+              className="p-0 border-none text-xs text-slate-600 dark:text-slate-300 focus:outline-none bg-transparent font-mono"
               value={dateRange.startDate}
               onChange={e => setDateRange({ ...dateRange, startDate: e.target.value })}
-              title="Data Inicial"
             />
             <span className="text-slate-300 dark:text-slate-700">-</span>
             <input 
               type="date" 
-              className="p-1.5 border-none text-xs text-slate-600 dark:text-slate-300 focus:outline-none bg-transparent"
+              className="p-0 border-none text-xs text-slate-600 dark:text-slate-300 focus:outline-none bg-transparent font-mono"
               value={dateRange.endDate}
               onChange={e => setDateRange({ ...dateRange, endDate: e.target.value })}
-              title="Data Final"
             />
           </div>
-          <span className="text-sm text-zinc-500 dark:text-zinc-400 mr-2">Filtrar:</span>
-          {(['all', 'low', 'medium', 'high'] as const).map((priority) => (
-            <button
-              key={priority}
-              onClick={() => setFilterPriority(priority)}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-200 border ${
-                filterPriority === priority
-                  ? priority === 'all' ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-zinc-900 dark:border-zinc-100' :
-                    priority === 'low' ? 'bg-emerald-500 text-white border-emerald-500' :
-                    priority === 'medium' ? 'bg-amber-500 text-white border-amber-500' :
-                    'bg-rose-500 text-white border-rose-500'
-                  : 'bg-white dark:bg-slate-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-slate-800 hover:border-zinc-400 dark:hover:border-slate-600'
-              }`}
-            >
-              {priority === 'all' ? 'Todas' : PRIORITY_LABELS[priority]}
-            </button>
-          ))}
+          <div className="flex items-center gap-1 bg-white dark:bg-[#111111] p-1 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm">
+            {(['all', 'low', 'medium', 'high'] as const).map((priority) => (
+              <button
+                key={priority}
+                onClick={() => setFilterPriority(priority)}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-wider transition-all duration-200 ${
+                  filterPriority === priority
+                    ? priority === 'all' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm' :
+                      priority === 'low' ? 'bg-emerald-500 text-white shadow-sm' :
+                      priority === 'medium' ? 'bg-amber-500 text-white shadow-sm' :
+                      'bg-rose-500 text-white shadow-sm'
+                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'
+                }`}
+              >
+                {priority === 'all' ? 'Todas' : PRIORITY_LABELS[priority]}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 

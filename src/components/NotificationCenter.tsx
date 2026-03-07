@@ -107,40 +107,40 @@ export const NotificationCenter: React.FC = () => {
     <div className="relative" ref={notificationRef}>
       <button 
         onClick={toggleOpen}
-        className="relative p-2 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+        className="relative p-2 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors"
       >
         <Bell size={20} />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+          <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white dark:border-[#111111]"></span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right">
-          <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
-            <h3 className="font-semibold text-slate-900 dark:text-slate-100">Notificações</h3>
+        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-xl border border-slate-200 dark:border-white/10 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+          <div className="p-4 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50/50 dark:bg-white/5">
+            <h3 className="font-semibold text-sm text-slate-900 dark:text-white">Notificações</h3>
             {unreadCount > 0 && (
               <button 
                 onClick={markAllAsRead}
-                className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium"
+                className="text-[10px] text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold uppercase tracking-wider transition-colors"
               >
-                Marcar todas como lidas
+                Marcar lidas
               </button>
             )}
           </div>
           
-          <div className="max-h-[400px] overflow-y-auto">
+          <div className="max-h-[400px] overflow-y-auto hide-scrollbar">
             {notifications.length === 0 ? (
               <div className="p-8 text-center text-slate-500 dark:text-slate-400">
                 <Bell size={24} className="mx-auto mb-2 opacity-20" />
                 <p className="text-sm">Nenhuma notificação</p>
               </div>
             ) : (
-              <div className="divide-y divide-slate-50 dark:divide-slate-800">
+              <div className="divide-y divide-slate-50 dark:divide-white/5">
                 {notifications.map(notification => (
                   <div 
                     key={notification.id} 
-                    className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer ${notification.read ? 'opacity-60' : 'bg-white dark:bg-slate-900'}`}
+                    className={`p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors cursor-pointer ${notification.read ? 'opacity-60' : 'bg-white dark:bg-[#1a1a1a]'}`}
                     onClick={() => markAsRead(notification.id)}
                   >
                     <div className="flex gap-3 items-start">
@@ -148,18 +148,18 @@ export const NotificationCenter: React.FC = () => {
                         {getIcon(notification.type)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-medium text-slate-900 dark:text-slate-100 ${!notification.read ? 'font-semibold' : ''}`}>
+                        <p className={`text-sm text-slate-900 dark:text-slate-100 ${!notification.read ? 'font-semibold' : 'font-medium'}`}>
                           {notification.title}
                         </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
                           {notification.message}
                         </p>
-                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5">
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-2 font-mono">
                           {notification.timestamp.toLocaleDateString()}
                         </p>
                       </div>
                       {!notification.read && (
-                        <div className="w-2 h-2 bg-indigo-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                        <div className="w-2 h-2 bg-indigo-500 rounded-full mt-1.5 flex-shrink-0 shadow-sm shadow-indigo-500/50"></div>
                       )}
                     </div>
                   </div>

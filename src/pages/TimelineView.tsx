@@ -78,10 +78,10 @@ const DraggableTaskBar: React.FC<{
     const threeDaysFromNow = addDays(today, 3);
 
     if (isPast(dueDate) || isToday(dueDate)) {
-      return 'bg-rose-500 border-rose-600 shadow-rose-200';
+      return 'bg-rose-500 border-rose-600 shadow-rose-200 dark:shadow-rose-900/20';
     }
     if (dueDate <= threeDaysFromNow) {
-      return 'bg-orange-500 border-orange-600 shadow-orange-200';
+      return 'bg-orange-500 border-orange-600 shadow-orange-200 dark:shadow-orange-900/20';
     }
     
     const priorityColors = {
@@ -99,7 +99,7 @@ const DraggableTaskBar: React.FC<{
   return (
     <div
       ref={setNodeRef}
-      className={`h-8 ${isStart ? 'rounded-l-md border-l' : ''} ${isEnd ? 'rounded-r-md border-r' : ''} border-y ${getTaskColor(task)} cursor-pointer flex items-center justify-between relative group hover:brightness-110 transition-all z-10`}
+      className={`h-8 ${isStart ? 'rounded-l-md border-l' : ''} ${isEnd ? 'rounded-r-md border-r' : ''} border-y ${getTaskColor(task)} cursor-pointer flex items-center justify-between relative group hover:brightness-110 transition-all z-10 shadow-sm`}
       title={task.title}
       onClick={() => onClick(task)}
     >
@@ -111,7 +111,7 @@ const DraggableTaskBar: React.FC<{
         className="flex-1 h-full flex items-center px-2 min-w-0 cursor-grab active:cursor-grabbing"
         onClick={(e) => e.stopPropagation()}
       >
-        {isStart && <span className="text-[10px] font-bold text-white truncate w-full pointer-events-none">{task.title}</span>}
+        {isStart && <span className="text-[10px] font-bold text-white truncate w-full pointer-events-none drop-shadow-sm">{task.title}</span>}
       </div>
 
       {isEnd && <ResizeHandle taskId={task.id} type="end" date={format(date, 'yyyy-MM-dd')} />}
@@ -133,9 +133,9 @@ const DroppableCell: React.FC<{ date: Date; taskId: number; children?: React.Rea
   return (
     <div
       ref={setNodeRef}
-      className={`h-12 border-r border-b border-slate-100 dark:border-slate-800/50 min-w-[60px] relative transition-colors ${
-        isOver ? 'bg-indigo-50/50 dark:bg-indigo-900/30' : ''
-      } ${isToday(date) ? 'bg-slate-50/30 dark:bg-slate-800/20' : ''}`}
+      className={`h-12 border-r border-b border-slate-100 dark:border-white/5 min-w-[60px] relative transition-colors ${
+        isOver ? 'bg-indigo-50/50 dark:bg-indigo-900/20' : ''
+      } ${isToday(date) ? 'bg-slate-50/50 dark:bg-white/5' : ''}`}
     >
       <div className="absolute inset-1">
         {children}
@@ -283,39 +283,37 @@ export const TimelineView: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex flex-col space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="h-full flex flex-col space-y-6 pb-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Cronograma Gantt</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">Arraste as tarefas para reagendar ou clique para editar</p>
+          <h1 className="text-3xl font-semibold text-slate-900 dark:text-white tracking-tight">Cronograma Gantt</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Arraste as tarefas para reagendar ou clique para editar</p>
         </div>
         
         <div className="flex flex-wrap items-center gap-3">
           {/* Date Range Filter Inputs */}
-          <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <div className="flex items-center gap-2 px-2 border-r border-slate-100 dark:border-slate-800">
-              <Filter size={14} className="text-slate-400 dark:text-slate-600" />
-              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Filtrar:</span>
+          <div className="flex items-center gap-2 bg-white dark:bg-[#111111] px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm">
+            <div className="flex items-center gap-2 pr-2 border-r border-slate-100 dark:border-white/10">
+              <Filter size={14} className="text-slate-400 dark:text-slate-500" />
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Filtrar</span>
             </div>
             <input 
               type="date" 
-              className="p-1.5 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:border-indigo-500 bg-transparent"
+              className="p-0 border-none text-xs text-slate-600 dark:text-slate-300 focus:outline-none bg-transparent font-mono"
               value={dateRange.startDate}
               onChange={e => setDateRange({ ...dateRange, startDate: e.target.value })}
-              title="Data Inicial"
             />
             <span className="text-slate-300 dark:text-slate-700">-</span>
             <input 
               type="date" 
-              className="p-1.5 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:border-indigo-500 bg-transparent"
+              className="p-0 border-none text-xs text-slate-600 dark:text-slate-300 focus:outline-none bg-transparent font-mono"
               value={dateRange.endDate}
               onChange={e => setDateRange({ ...dateRange, endDate: e.target.value })}
-              title="Data Final"
             />
             {(dateRange.startDate || dateRange.endDate) && (
               <button 
                 onClick={clearFilters}
-                className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors"
+                className="p-1 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors ml-1"
                 title="Limpar filtros"
               >
                 <X size={14} />
@@ -325,16 +323,16 @@ export const TimelineView: React.FC = () => {
 
           {/* Navigation Controls - Only show if not filtering */}
           {(!dateRange.startDate && !dateRange.endDate) && (
-            <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-              <button onClick={navigatePrev} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-400 transition-colors">
-                <ChevronLeft size={20} />
+            <div className="flex items-center gap-1 bg-white dark:bg-[#111111] p-1 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm">
+              <button onClick={navigatePrev} className="p-1.5 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg text-slate-500 dark:text-slate-400 transition-colors">
+                <ChevronLeft size={18} />
               </button>
-              <button onClick={navigateToday} className="px-4 py-2 font-medium text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-2">
-                <CalendarIcon size={16} />
+              <button onClick={navigateToday} className="px-3 py-1.5 font-medium text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg transition-colors flex items-center gap-1.5">
+                <CalendarIcon size={14} />
                 Hoje
               </button>
-              <button onClick={navigateNext} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-400 transition-colors">
-                <ChevronRight size={20} />
+              <button onClick={navigateNext} className="p-1.5 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg text-slate-500 dark:text-slate-400 transition-colors">
+                <ChevronRight size={18} />
               </button>
             </div>
           )}
@@ -346,22 +344,22 @@ export const TimelineView: React.FC = () => {
         onDragStart={handleDragStart} 
         onDragEnd={handleDragEnd}
       >
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col flex-1 min-h-[600px]">
+        <div className="bg-white dark:bg-[#111111] rounded-2xl shadow-sm border border-slate-200 dark:border-white/10 overflow-hidden flex flex-col flex-1 min-h-[600px]">
           {/* Header Row */}
-          <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
-            <div className="w-64 flex-shrink-0 p-4 font-semibold text-slate-600 dark:text-slate-400 text-sm border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 z-10">
+          <div className="flex border-b border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-white/5">
+            <div className="w-64 flex-shrink-0 p-4 font-semibold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-wider border-r border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-white/5 z-10 flex items-center">
               Tarefa
             </div>
             <div className="flex overflow-x-auto hide-scrollbar">
               {days.map(day => (
                 <div 
                   key={day.toISOString()} 
-                  className={`min-w-[60px] p-2 text-center border-r border-slate-200 dark:border-slate-800 flex-shrink-0 ${isToday(day) ? 'bg-indigo-50/50 dark:bg-indigo-900/20' : ''}`}
+                  className={`min-w-[60px] p-2 text-center border-r border-slate-200 dark:border-white/10 flex-shrink-0 ${isToday(day) ? 'bg-indigo-50/50 dark:bg-indigo-900/20' : ''}`}
                 >
-                  <div className={`text-xs font-medium uppercase mb-1 ${isToday(day) ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-600'}`}>
+                  <div className={`text-[10px] font-semibold uppercase tracking-wider mb-1 ${isToday(day) ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`}>
                     {format(day, 'EEE', { locale: ptBR })}
                   </div>
-                  <div className={`text-sm font-bold w-8 h-8 rounded-full flex items-center justify-center mx-auto ${isToday(day) ? 'bg-indigo-600 text-white' : 'text-slate-700 dark:text-slate-300'}`}>
+                  <div className={`text-sm font-bold w-7 h-7 rounded-full flex items-center justify-center mx-auto font-mono ${isToday(day) ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-700 dark:text-slate-300'}`}>
                     {format(day, 'd')}
                   </div>
                 </div>
@@ -372,22 +370,22 @@ export const TimelineView: React.FC = () => {
           {/* Body */}
           <div className="overflow-auto flex-1">
             {filteredTasks.map(task => (
-              <div key={task.id} className="flex hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+              <div key={task.id} className="flex hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors group">
                 {/* Task Name Column */}
-                <div className="w-64 flex-shrink-0 p-3 border-r border-slate-200 dark:border-slate-800 border-b border-slate-100 dark:border-slate-800/50 flex items-center justify-between bg-white dark:bg-slate-900 sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                <div className="w-64 flex-shrink-0 p-3 border-r border-slate-200 dark:border-white/10 border-b border-slate-100 dark:border-white/5 flex items-center justify-between bg-white dark:bg-[#111111] sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] dark:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.2)]">
                   <div className="flex items-center gap-2 truncate">
-                    <div className={`w-2 h-2 rounded-full ${
+                    <div className={`w-1.5 h-1.5 rounded-full ${
                       task.priority === 'high' ? 'bg-rose-500' : 
                       task.priority === 'medium' ? 'bg-amber-500' : 
                       'bg-emerald-500'
                     }`} />
                     <div 
-                      className="truncate text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" 
+                      className="truncate text-sm font-medium text-slate-700 dark:text-slate-200 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" 
                       title={task.title}
                       onClick={() => setEditingTask(task)}
                     >
                       {task.title}
-                      <div className="text-[10px] text-slate-400 dark:text-slate-500">
+                      <div className="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">
                         {task.startDate && <span>{new Date(task.startDate).toLocaleDateString('pt-BR')}</span>}
                         {task.startDate && task.endDate && <span> - </span>}
                         {task.endDate && <span>{new Date(task.endDate).toLocaleDateString('pt-BR')}</span>}
@@ -396,12 +394,12 @@ export const TimelineView: React.FC = () => {
                   </div>
                   <button 
                     onClick={() => setCommentingTask(task)}
-                    className="text-slate-400 dark:text-slate-600 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-1"
+                    className="text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-1 opacity-0 group-hover:opacity-100"
                     title="Comentários"
                   >
                     <MessageSquare size={14} />
                     {task.comments && task.comments.length > 0 && (
-                      <span className="text-[10px] font-bold">{task.comments.length}</span>
+                      <span className="text-[10px] font-bold font-mono">{task.comments.length}</span>
                     )}
                   </button>
                 </div>
@@ -439,7 +437,7 @@ export const TimelineView: React.FC = () => {
             ))}
             
             {filteredTasks.length === 0 && (
-              <div className="p-12 text-center text-slate-400 dark:text-slate-600 italic">
+              <div className="p-16 text-center text-slate-400 dark:text-slate-500 text-sm">
                 {tasks.length === 0 ? "Nenhuma tarefa criada." : "Nenhuma tarefa encontrada neste intervalo."}
               </div>
             )}
@@ -448,8 +446,8 @@ export const TimelineView: React.FC = () => {
 
         <DragOverlay>
           {activeTask ? (
-            <div className="h-8 rounded-md shadow-lg bg-indigo-600 text-white flex items-center px-2 w-[150px] opacity-90 cursor-grabbing">
-              <span className="text-xs font-bold truncate">{activeTask.title}</span>
+            <div className="h-8 rounded-md shadow-xl bg-indigo-600 text-white flex items-center px-2 w-[150px] opacity-90 cursor-grabbing">
+              <span className="text-xs font-bold truncate drop-shadow-sm">{activeTask.title}</span>
             </div>
           ) : null}
         </DragOverlay>

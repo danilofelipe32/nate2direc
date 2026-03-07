@@ -9,10 +9,8 @@ import {
   CheckCircle2, AlertOctagon, Clock, Activity, 
   TrendingUp, CalendarDays, ListTodo, Zap 
 } from 'lucide-react';
-import { format, addDays, isSameDay, parseISO, startOfWeek, endOfWeek, eachDayOfInterval, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
+import { format, isSameDay, parseISO, startOfWeek, endOfWeek, eachDayOfInterval, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-
-const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#f43f5e'];
 
 export const DashboardView: React.FC = () => {
   const { tasks, dateRange, setDateRange } = useTasks();
@@ -58,7 +56,6 @@ export const DashboardView: React.FC = () => {
   const overdueTasks = tasks.filter(t => new Date(t.due_date) < new Date() && t.status !== 'done');
   const completionRate = tasks.length > 0 ? Math.round((tasks.filter(t => t.status === 'done').length / tasks.length) * 100) : 0;
   
-  // Weekly Trend Data (Mocked based on due dates for demonstration of "Workload")
   const weeklyWorkload = useMemo(() => {
     const today = new Date();
     const start = startOfWeek(today, { weekStartsOn: 0 });
@@ -86,55 +83,44 @@ export const DashboardView: React.FC = () => {
   // --- Components ---
 
   const StatCard = ({ title, value, icon: Icon, color, subtext }: any) => (
-    <div className="relative overflow-hidden bg-white/40 dark:bg-slate-900/60 backdrop-blur-xl border border-white/50 dark:border-slate-800/50 p-6 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 group">
-      <div className={`absolute -right-6 -top-6 w-24 h-24 rounded-full opacity-10 group-hover:scale-110 transition-transform duration-500 ${color.bg}`} />
-      <div className="flex items-start justify-between relative z-10">
-        <div>
-          <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">{title}</p>
-          <h3 className="text-3xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">{value}</h3>
-          {subtext && <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">{subtext}</p>}
+    <div className="bg-white dark:bg-[#111111] border border-slate-200 dark:border-white/10 p-6 rounded-2xl shadow-sm flex flex-col justify-between">
+      <div className="flex items-start justify-between mb-4">
+        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{title}</p>
+        <div className={`p-2 rounded-lg ${color.bg} ${color.text}`}>
+          <Icon size={18} strokeWidth={2.5} />
         </div>
-        <div className={`p-3 rounded-2xl ${color.bg} ${color.text} shadow-sm group-hover:rotate-12 transition-transform duration-300`}>
-          <Icon size={24} />
-        </div>
+      </div>
+      <div>
+        <h3 className="text-4xl font-light font-mono text-slate-900 dark:text-white tracking-tight">{value}</h3>
+        {subtext && <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 font-medium">{subtext}</p>}
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen space-y-8 pb-10 relative">
-      {/* Background Blobs */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-400/20 dark:bg-indigo-900/20 blur-[100px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-rose-400/20 dark:bg-rose-900/20 blur-[100px]" />
-        <div className="absolute top-[20%] right-[20%] w-[30%] h-[30%] rounded-full bg-emerald-400/20 dark:bg-emerald-900/20 blur-[100px]" />
-      </div>
-
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="min-h-screen space-y-8 pb-10">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Dashboard</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Visão geral da sua produtividade e métricas.</p>
+          <h1 className="text-3xl font-semibold text-slate-900 dark:text-white tracking-tight">Dashboard</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Visão geral da sua produtividade e métricas.</p>
         </div>
-        <div className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/60 dark:border-slate-800/60 shadow-sm">
+        <div className="flex items-center gap-3 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-[#111111] px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm">
+          <CalendarDays size={16} className="text-slate-400" />
           <div className="flex items-center gap-2">
             <input 
               type="date" 
-              className="p-1 border-none text-xs text-slate-600 dark:text-slate-300 focus:outline-none bg-transparent"
+              className="p-0 border-none text-xs text-slate-600 dark:text-slate-300 focus:outline-none bg-transparent font-mono"
               value={dateRange.startDate}
               onChange={e => setDateRange({ ...dateRange, startDate: e.target.value })}
-              title="Data Inicial"
             />
             <span className="text-slate-300 dark:text-slate-700">-</span>
             <input 
               type="date" 
-              className="p-1 border-none text-xs text-slate-600 dark:text-slate-300 focus:outline-none bg-transparent"
+              className="p-0 border-none text-xs text-slate-600 dark:text-slate-300 focus:outline-none bg-transparent font-mono"
               value={dateRange.endDate}
               onChange={e => setDateRange({ ...dateRange, endDate: e.target.value })}
-              title="Data Final"
             />
           </div>
-          <CalendarDays size={16} className="text-indigo-600 dark:text-indigo-400" />
-          {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
         </div>
       </div>
 
@@ -144,82 +130,80 @@ export const DashboardView: React.FC = () => {
           title="Taxa de Conclusão" 
           value={`${completionRate}%`} 
           icon={Activity} 
-          color={{ bg: 'bg-indigo-100', text: 'text-indigo-600' }}
+          color={{ bg: 'bg-indigo-50 dark:bg-indigo-500/10', text: 'text-indigo-600 dark:text-indigo-400' }}
           subtext="Baseado no total de tarefas"
         />
         <StatCard 
           title="Tarefas Atrasadas" 
           value={overdueTasks.length} 
           icon={AlertOctagon} 
-          color={{ bg: 'bg-rose-100', text: 'text-rose-600' }}
+          color={{ bg: 'bg-rose-50 dark:bg-rose-500/10', text: 'text-rose-600 dark:text-rose-400' }}
           subtext="Requer atenção imediata"
         />
         <StatCard 
           title="Em Progresso" 
           value={tasks.filter(t => t.status === 'in-progress').length} 
           icon={Zap} 
-          color={{ bg: 'bg-amber-100', text: 'text-amber-600' }}
+          color={{ bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400' }}
           subtext="Tarefas sendo executadas"
         />
         <StatCard 
           title="Total de Tarefas" 
           value={tasks.length} 
           icon={ListTodo} 
-          color={{ bg: 'bg-emerald-100', text: 'text-emerald-600' }}
+          color={{ bg: 'bg-emerald-50 dark:bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400' }}
           subtext={`${tasks.filter(t => t.status === 'done').length} concluídas`}
         />
       </div>
 
       {/* Main Charts Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Weekly Workload - Area Chart */}
-        <div className="lg:col-span-2 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/50 dark:border-slate-800/50 p-8 rounded-3xl shadow-lg flex flex-col h-[400px]">
+        <div className="lg:col-span-2 bg-white dark:bg-[#111111] border border-slate-200 dark:border-white/10 p-6 rounded-2xl shadow-sm flex flex-col h-[380px]">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-              <TrendingUp size={20} className="text-indigo-600 dark:text-indigo-400" />
+            <h3 className="text-sm font-semibold text-slate-800 dark:text-white uppercase tracking-wider">
               Carga de Trabalho Semanal
             </h3>
-            <span className="text-xs font-medium px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full border border-indigo-100 dark:border-indigo-800">
-              Próximos 7 dias
-            </span>
           </div>
           <div className="flex-1 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={weeklyWorkload}>
+              <AreaChart data={weeklyWorkload} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorTasks" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
+                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2}/>
                     <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(150,150,150,0.1)" />
                 <XAxis 
                   dataKey="name" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: '#64748b', fontSize: 12 }} 
+                  tick={{ fill: '#94a3b8', fontSize: 11, textTransform: 'uppercase' }} 
                   dy={10}
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: '#64748b', fontSize: 12 }} 
+                  tick={{ fill: '#94a3b8', fontSize: 11, fontFamily: 'monospace' }} 
                 />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)', 
-                    backdropFilter: 'blur(8px)',
-                    borderRadius: '16px', 
-                    border: '1px solid rgba(255,255,255,0.5)', 
-                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' 
+                    backgroundColor: 'var(--tw-colors-slate-900)', 
+                    color: '#fff',
+                    borderRadius: '8px', 
+                    border: 'none', 
+                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.2)',
+                    fontSize: '12px'
                   }}
-                  cursor={{ stroke: '#6366f1', strokeWidth: 2, strokeDasharray: '5 5' }}
+                  itemStyle={{ color: '#fff' }}
+                  cursor={{ stroke: '#6366f1', strokeWidth: 1, strokeDasharray: '4 4' }}
                 />
                 <Area 
                   type="monotone" 
                   dataKey="tasks" 
                   stroke="#6366f1" 
-                  strokeWidth={3}
+                  strokeWidth={2}
                   fillOpacity={1} 
                   fill="url(#colorTasks)" 
                 />
@@ -228,10 +212,9 @@ export const DashboardView: React.FC = () => {
           </div>
         </div>
 
-        {/* Priority Distribution - Radial Bar or Pie */}
-        <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/50 dark:border-slate-800/50 p-8 rounded-3xl shadow-lg flex flex-col h-[400px]">
-          <h3 className="text-lg font-bold mb-6 text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <Activity size={20} className="text-emerald-600 dark:text-emerald-400" />
+        {/* Priority Distribution - Pie */}
+        <div className="bg-white dark:bg-[#111111] border border-slate-200 dark:border-white/10 p-6 rounded-2xl shadow-sm flex flex-col h-[380px]">
+          <h3 className="text-sm font-semibold text-slate-800 dark:text-white uppercase tracking-wider mb-6">
             Distribuição
           </h3>
           <div className="flex-1 w-full relative">
@@ -241,79 +224,67 @@ export const DashboardView: React.FC = () => {
                   data={statusData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={0}
+                  innerRadius={60}
                   outerRadius={90}
                   paddingAngle={2}
                   dataKey="value"
-                  stroke="white"
-                  strokeWidth={2}
-                  cornerRadius={6}
-                  animationBegin={0}
-                  animationDuration={1500}
+                  stroke="none"
+                  cornerRadius={4}
                 >
                   {statusData.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={entry.color} 
-                      style={{ filter: 'drop-shadow(0px 4px 6px rgba(0,0,0,0.1))' }}
-                    />
+                    <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.9)', 
-                    backdropFilter: 'blur(12px)',
-                    borderRadius: '16px', 
-                    border: '1px solid rgba(255,255,255,0.3)', 
-                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' 
+                    backgroundColor: 'var(--tw-colors-slate-900)', 
+                    color: '#fff',
+                    borderRadius: '8px', 
+                    border: 'none',
+                    fontSize: '12px'
                   }}
-                  itemStyle={{ color: '#1e293b', fontWeight: 600, fontSize: '14px' }}
+                  itemStyle={{ color: '#fff' }}
                 />
                 <Legend 
                   verticalAlign="bottom" 
-                  height={40} 
+                  height={36} 
                   iconType="circle" 
-                  formatter={(value) => <span className="text-slate-700 font-semibold ml-2 text-sm">{value}</span>}
+                  iconSize={8}
+                  formatter={(value) => <span className="text-slate-600 dark:text-slate-400 text-xs font-medium ml-1">{value}</span>}
                 />
               </PieChart>
             </ResponsiveContainer>
-            {/* Center Text removed */}
           </div>
         </div>
       </div>
 
       {/* Bottom Section: Upcoming & Priorities */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Upcoming Deadlines List */}
-        <div className="lg:col-span-1 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/50 dark:border-slate-800/50 p-8 rounded-3xl shadow-lg h-[350px] flex flex-col">
-          <h3 className="text-lg font-bold mb-4 text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <Clock size={20} className="text-amber-500 dark:text-amber-400" />
+        <div className="lg:col-span-1 bg-white dark:bg-[#111111] border border-slate-200 dark:border-white/10 p-6 rounded-2xl shadow-sm h-[320px] flex flex-col">
+          <h3 className="text-sm font-semibold text-slate-800 dark:text-white uppercase tracking-wider mb-4">
             Próximos Prazos
           </h3>
-          <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto pr-2 space-y-2 custom-scrollbar">
             {upcomingDeadlines.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
-                <CheckCircle2 size={32} className="mb-2 opacity-50" />
-                <p className="text-sm">Tudo em dia!</p>
+                <CheckCircle2 size={24} className="mb-2 opacity-30" />
+                <p className="text-xs font-medium">Tudo em dia!</p>
               </div>
             ) : (
               upcomingDeadlines.map(task => (
-                <div key={task.id} className="flex items-center gap-3 p-3 bg-white/60 dark:bg-slate-800/60 rounded-xl border border-white/50 dark:border-slate-700/50 shadow-sm hover:shadow-md transition-all">
-                  <div className={`w-1.5 h-10 rounded-full ${
+                <div key={task.id} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5">
+                  <div className={`w-1 h-8 rounded-full ${
                     task.priority === 'high' ? 'bg-rose-500' : 
                     task.priority === 'medium' ? 'bg-amber-500' : 
                     'bg-emerald-500'
                   }`} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">{task.title}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                      <CalendarDays size={10} />
-                      {format(parseISO(task.due_date), "d 'de' MMM", { locale: ptBR })}
+                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{task.title}</p>
+                    <p className="text-[10px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">
+                      {format(parseISO(task.due_date), "dd MMM yyyy", { locale: ptBR })}
                     </p>
                   </div>
-                  {task.priority === 'high' && (
-                    <AlertOctagon size={16} className="text-rose-500" />
-                  )}
                 </div>
               ))
             )}
@@ -321,35 +292,35 @@ export const DashboardView: React.FC = () => {
         </div>
 
         {/* Priority Bar Chart */}
-        <div className="lg:col-span-2 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/50 dark:border-slate-800/50 p-8 rounded-3xl shadow-lg h-[350px] flex flex-col">
-          <h3 className="text-lg font-bold mb-6 text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <AlertOctagon size={20} className="text-rose-500 dark:text-rose-400" />
+        <div className="lg:col-span-2 bg-white dark:bg-[#111111] border border-slate-200 dark:border-white/10 p-6 rounded-2xl shadow-sm h-[320px] flex flex-col">
+          <h3 className="text-sm font-semibold text-slate-800 dark:text-white uppercase tracking-wider mb-6">
             Tarefas por Prioridade
           </h3>
           <div className="flex-1 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={priorityData} barSize={40} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="rgba(0,0,0,0.05)" />
+              <BarChart data={priorityData} barSize={32} layout="vertical" margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="rgba(150,150,150,0.1)" />
                 <XAxis type="number" hide />
                 <YAxis 
                   dataKey="name" 
                   type="category" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: '#64748b', fontSize: 13, fontWeight: 500 }} 
+                  tick={{ fill: '#94a3b8', fontSize: 11, textTransform: 'uppercase' }} 
                   width={80}
                 />
                 <Tooltip 
-                  cursor={{ fill: 'rgba(255,255,255,0.2)' }}
+                  cursor={{ fill: 'rgba(150,150,150,0.05)' }}
                   contentStyle={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)', 
-                    backdropFilter: 'blur(8px)',
-                    borderRadius: '12px', 
-                    border: 'none', 
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)' 
+                    backgroundColor: 'var(--tw-colors-slate-900)', 
+                    color: '#fff',
+                    borderRadius: '8px', 
+                    border: 'none',
+                    fontSize: '12px'
                   }}
+                  itemStyle={{ color: '#fff' }}
                 />
-                <Bar dataKey="value" radius={[0, 8, 8, 0]}>
+                <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                   {priorityData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}

@@ -23,9 +23,9 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 const PRIORITY_COLORS = {
-  low: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800',
-  medium: 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800',
-  high: 'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-800',
+  low: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20',
+  medium: 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20',
+  high: 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/20',
 };
 
 const PRIORITY_LABELS = {
@@ -69,39 +69,39 @@ const SortableTaskRow: React.FC<SortableTaskRowProps> = ({ task, updateTaskStatu
     transition,
     zIndex: isDragging ? 10 : 'auto',
     position: isDragging ? 'relative' : 'static' as any,
-    opacity: isDragging ? 0.8 : 1,
+    opacity: isDragging ? 0.9 : 1,
   };
 
   return (
     <tr
       ref={setNodeRef}
       style={style}
-      className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors group ${isDragging ? 'bg-indigo-50 dark:bg-indigo-900/20 shadow-lg' : ''}`}
+      className={`hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group border-b border-slate-100 dark:border-white/5 last:border-0 ${isDragging ? 'bg-indigo-50/50 dark:bg-indigo-900/20 shadow-lg' : ''}`}
     >
       <td className="p-4 w-10">
-        <div {...attributes} {...listeners} className="cursor-grab text-slate-400 dark:text-slate-600 hover:text-indigo-600 dark:hover:text-indigo-400">
+        <div {...attributes} {...listeners} className="cursor-grab text-slate-300 dark:text-slate-600 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
           <GripVertical size={16} />
         </div>
       </td>
       <td className="p-4 w-10">
         <button 
           onClick={() => updateTaskStatus(task.id, task.status === 'done' ? 'todo' : 'done')}
-          className={`transition-colors ${task.status === 'done' ? 'text-emerald-500' : 'text-slate-300 dark:text-slate-700 hover:text-indigo-500 dark:hover:text-indigo-400'}`}
+          className={`transition-colors ${task.status === 'done' ? 'text-emerald-500' : 'text-slate-300 dark:text-slate-600 hover:text-indigo-500 dark:hover:text-indigo-400'}`}
         >
-          {task.status === 'done' ? <CheckCircle size={22} className="fill-emerald-50 dark:fill-emerald-900/20" /> : <Circle size={22} />}
+          {task.status === 'done' ? <CheckCircle size={20} className="fill-emerald-50 dark:fill-emerald-500/10" /> : <Circle size={20} />}
         </button>
       </td>
       <td className="p-4 cursor-pointer" onClick={() => onEditClick(task)}>
-        <div className={`font-medium text-slate-900 dark:text-slate-100 ${task.status === 'done' ? 'line-through text-slate-400 dark:text-slate-600' : ''}`}>{task.title}</div>
-        {task.description && <div className="text-xs text-slate-500 dark:text-slate-500 truncate max-w-md mt-0.5">{task.description}</div>}
+        <div className={`font-medium text-sm text-slate-900 dark:text-slate-100 ${task.status === 'done' ? 'line-through text-slate-400 dark:text-slate-500' : ''}`}>{task.title}</div>
+        {task.description && <div className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-md mt-1">{task.description}</div>}
       </td>
       <td className="p-4">
-        <span className={`text-[10px] px-2.5 py-1 rounded-full font-semibold uppercase tracking-wide border ${PRIORITY_COLORS[task.priority]}`}>
+        <span className={`text-[10px] px-2.5 py-1 rounded font-bold uppercase tracking-wider border ${PRIORITY_COLORS[task.priority]}`}>
           {PRIORITY_LABELS[task.priority]}
         </span>
       </td>
-      <td className="p-4 text-sm text-slate-500 dark:text-slate-400 font-mono">
-        <div className="flex flex-col gap-0.5">
+      <td className="p-4 text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+        <div className="flex flex-col gap-1">
           {task.startDate && <span>Início: {new Date(task.startDate).toLocaleDateString('pt-BR')}</span>}
           {task.endDate && <span>Fim: {new Date(task.endDate).toLocaleDateString('pt-BR')}</span>}
         </div>
@@ -110,20 +110,20 @@ const SortableTaskRow: React.FC<SortableTaskRowProps> = ({ task, updateTaskStatu
         <div className="flex justify-end gap-2">
           <button 
             onClick={() => onCommentClick(task)}
-            className="p-2 text-slate-400 dark:text-slate-600 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-all opacity-0 group-hover:opacity-100 flex items-center gap-1"
+            className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100 flex items-center gap-1"
             title="Comentários"
           >
-            <MessageSquare size={18} />
+            <MessageSquare size={16} />
             {task.comments && task.comments.length > 0 && (
-              <span className="text-xs font-bold">{task.comments.length}</span>
+              <span className="text-[10px] font-bold font-mono">{task.comments.length}</span>
             )}
           </button>
           <button 
             onClick={() => deleteTask(task.id)}
-            className="p-2 text-slate-400 dark:text-slate-600 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+            className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
             title="Excluir"
           >
-            <Trash2 size={18} />
+            <Trash2 size={16} />
           </button>
         </div>
       </td>
@@ -175,75 +175,75 @@ export const ListView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 pb-10">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Lista de Tarefas</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">Gerencie suas tarefas em formato de lista</p>
+          <h1 className="text-3xl font-semibold text-slate-900 dark:text-white tracking-tight">Lista de Tarefas</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Gerencie suas tarefas em formato de lista</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <div className="flex items-center gap-2 bg-white dark:bg-[#111111] px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm w-full sm:w-auto">
             <input 
               type="date" 
-              className="p-1.5 border-none text-xs text-slate-600 dark:text-slate-300 focus:outline-none bg-transparent"
+              className="p-0 border-none text-xs text-slate-600 dark:text-slate-300 focus:outline-none bg-transparent font-mono"
               value={dateRange.startDate}
               onChange={e => setDateRange({ ...dateRange, startDate: e.target.value })}
-              title="Data Inicial"
             />
             <span className="text-slate-300 dark:text-slate-700">-</span>
             <input 
               type="date" 
-              className="p-1.5 border-none text-xs text-slate-600 dark:text-slate-300 focus:outline-none bg-transparent"
+              className="p-0 border-none text-xs text-slate-600 dark:text-slate-300 focus:outline-none bg-transparent font-mono"
               value={dateRange.endDate}
               onChange={e => setDateRange({ ...dateRange, endDate: e.target.value })}
-              title="Data Final"
             />
           </div>
           <input
             type="text"
             placeholder="Buscar tarefas..."
-            className="p-2.5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg w-72 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm"
+            className="px-4 py-2 text-sm border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111111] text-slate-900 dark:text-white rounded-xl w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm placeholder:text-slate-400"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
           />
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+      <div className="bg-white dark:bg-[#111111] rounded-2xl shadow-sm border border-slate-200 dark:border-white/10 overflow-hidden">
         <DndContext 
           sensors={sensors} 
           collisionDetection={closestCenter} 
           onDragEnd={handleDragEnd}
         >
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-              <tr>
-                <th className="p-4 w-10"></th>
-                <th className="p-4 font-semibold text-slate-600 dark:text-slate-400 text-xs uppercase tracking-wider w-10">Status</th>
-                <th className="p-4 font-semibold text-slate-600 dark:text-slate-400 text-xs uppercase tracking-wider w-1/2">Tarefa</th>
-                <th className="p-4 font-semibold text-slate-600 dark:text-slate-400 text-xs uppercase tracking-wider">Prioridade</th>
-                <th className="p-4 font-semibold text-slate-600 dark:text-slate-400 text-xs uppercase tracking-wider">Vencimento</th>
-                <th className="p-4 font-semibold text-slate-600 dark:text-slate-400 text-xs uppercase tracking-wider text-right">Ações</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              <SortableContext 
-                items={filteredTasks.map(t => t.id)} 
-                strategy={verticalListSortingStrategy}
-              >
-                {filteredTasks.map((task) => (
-                  <SortableTaskRow 
-                    key={task.id} 
-                    task={task} 
-                    updateTaskStatus={updateTaskStatus} 
-                    deleteTask={deleteTask} 
-                    onCommentClick={setCommentingTask}
-                    onEditClick={setEditingTask}
-                  />
-                ))}
-              </SortableContext>
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[800px]">
+              <thead className="bg-slate-50/50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10">
+                <tr>
+                  <th className="p-4 w-10"></th>
+                  <th className="p-4 font-semibold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-wider w-10">Status</th>
+                  <th className="p-4 font-semibold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-wider w-1/2">Tarefa</th>
+                  <th className="p-4 font-semibold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-wider">Prioridade</th>
+                  <th className="p-4 font-semibold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-wider">Vencimento</th>
+                  <th className="p-4 font-semibold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-wider text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <SortableContext 
+                  items={filteredTasks.map(t => t.id)} 
+                  strategy={verticalListSortingStrategy}
+                >
+                  {filteredTasks.map((task) => (
+                    <SortableTaskRow 
+                      key={task.id} 
+                      task={task} 
+                      updateTaskStatus={updateTaskStatus} 
+                      deleteTask={deleteTask} 
+                      onCommentClick={setCommentingTask}
+                      onEditClick={setEditingTask}
+                    />
+                  ))}
+                </SortableContext>
+              </tbody>
+            </table>
+          </div>
         </DndContext>
         
         {commentingTask && (
@@ -265,12 +265,12 @@ export const ListView: React.FC = () => {
         )}
         
         {filteredTasks.length === 0 && (
-          <div className="p-12 text-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
-              <CheckCircle className="text-slate-400 dark:text-slate-600" size={24} />
+          <div className="p-16 text-center flex flex-col items-center justify-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-white/5 mb-4">
+              <CheckCircle className="text-slate-400 dark:text-slate-500" size={32} strokeWidth={1.5} />
             </div>
-            <h3 className="text-slate-900 dark:text-slate-100 font-medium mb-1">Nenhuma tarefa encontrada</h3>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">Tente ajustar sua busca ou adicione uma nova tarefa.</p>
+            <h3 className="text-slate-900 dark:text-white font-medium mb-1">Nenhuma tarefa encontrada</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-sm max-w-sm">Tente ajustar sua busca ou adicione uma nova tarefa para começar.</p>
           </div>
         )}
       </div>

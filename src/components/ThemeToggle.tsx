@@ -31,18 +31,18 @@ export const ThemeToggle: React.FC = () => {
   return (
     <button
       onClick={toggleTheme}
-      className="relative w-14 h-7 bg-slate-200 dark:bg-slate-700 rounded-full p-1 flex items-center transition-colors duration-300 focus:outline-none"
+      className="relative w-12 h-6 bg-slate-200 dark:bg-white/10 rounded-full p-1 flex items-center transition-colors duration-300 focus:outline-none shadow-inner"
       aria-label="Toggle dark mode"
     >
       <motion.div
-        className="w-5 h-5 bg-white rounded-full shadow-md flex items-center justify-center"
-        animate={{ x: isDarkMode ? 28 : 0 }}
+        className="w-4 h-4 bg-white dark:bg-slate-800 rounded-full shadow-sm flex items-center justify-center"
+        animate={{ x: isDarkMode ? 24 : 0 }}
         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
       >
         {isDarkMode ? (
-          <Moon size={12} className="text-slate-900" />
+          <Moon size={10} className="text-indigo-400" />
         ) : (
-          <Sun size={12} className="text-amber-500" />
+          <Sun size={10} className="text-amber-500" />
         )}
       </motion.div>
     </button>
